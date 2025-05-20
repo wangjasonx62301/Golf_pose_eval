@@ -10,7 +10,7 @@ git clone https://github.com/wangjasonx62301/Golf_pose_eval.git
 cd Golf_pose_eval
 
 # Install dependencies
-pip install -r requirements.txt or other command
+pip install -r requirements.txt 
 ```
 
 ## Dataset preparation
