@@ -1,0 +1,18 @@
+model:
+  latent_dim: 32
+  hidden_dim: 128
+  rnn_type: "gru"
+  input_dim: 51
+
+data:
+  window_size: 8
+  json_dir: "../example_output"
+
+training:
+  batch_size: 8
+  num_epochs: 100
+  learning_rate: 0.001
+  beta: 0.001
+  confidence_threshold: 0.1
+
+device: "cuda"
