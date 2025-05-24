@@ -44,3 +44,36 @@ class Time_Series_VAE(nn.Module):
         z = self.reparameterize(mu, logvar)
         recon = self.decode(z, x.size(1))
         return recon, mu, logvar
+    
+class MLP(nn.Module):
+    
+    def __init__(self, config):
+        super().__init__()
+        self.classifier = nn.Sequential(
+            nn.Linear(config['model']['latent_dim'], config['model']['hidden_dim']),
+            nn.SiLU(),
+            nn.Linear(config['model']['hidden_dim'], config['model']['latent_dim'])
+        )
+        self.norm = nn.LayerNorm(config['model']['latent_dim'])
+        
+    def forward(self, x):
+        logits = self.classifier(x)
+        return self.norm(x + logits)
+    
+class Golf_Pose_Classifier(nn.Module):
+    
+    def __init__(self, config):
+        super().__init__()
+        self.MLP_STACK = nn.Sequential(*[MLP(config) for _ in range(config['model']['num_mlp_iter'])])
+        self.a_fn = nn.GELU()
+        self.out_proj = nn.Linear(config['model']['latent_dim'], config['model']['num_classes'])
+    
+    def forward(self, x):
+        
+        x = self.MLP_STACK(x)
+        logits = self.out_proj(self.a_fn(x))
+        
+        return logits
+        
+        
+    
