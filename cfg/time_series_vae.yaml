@@ -3,10 +3,13 @@ model:
   hidden_dim: 128
   rnn_type: "gru"
   input_dim: 51
+  num_classes: 2
+  num_mlp_iter: 5
 
 data:
   window_size: 8
   json_dir: "../example_output"
+  eval_json_dir: "../eval_json"
 
 training:
   batch_size: 8
@@ -14,5 +17,9 @@ training:
   learning_rate: 0.001
   beta: 0.001
   confidence_threshold: 0.1
+  warmup_iters: 300
+  lr_decay_iters: 3000
+  min_lr: 0.0001
+  iters: 5000
 
 device: "cuda"
