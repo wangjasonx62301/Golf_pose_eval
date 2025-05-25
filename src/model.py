@@ -45,6 +45,20 @@ class Time_Series_VAE(nn.Module):
         recon = self.decode(z, x.size(1))
         return recon, mu, logvar
     
+    def predict_future_frames(self, x_init, n_future):
+        preds = []
+        current_seq = x_init.clone()  # (1, T, 51)
+        for _ in range(n_future):
+            with torch.no_grad():
+                mu, logvar = self.encode(current_seq)
+                z = self.reparameterize(mu, logvar)
+                h = self.decoder_input(z).unsqueeze(1)
+                out, _ = self.decoder_rnn(h)
+                pred = self.output_layer(out).squeeze(1)  # (1, 51)
+            preds.append(pred.squeeze(0).cpu())
+            current_seq = torch.cat([current_seq[:, 1:], pred.unsqueeze(1)], dim=1)
+        return torch.stack(preds)  # (n_future, 51)
+    
 class MLP(nn.Module):
     
     def __init__(self, config):

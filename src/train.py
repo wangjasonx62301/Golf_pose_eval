@@ -16,19 +16,20 @@ def eval_vae(model, config):
 
     device = torch.device(config["device"])
 
-    json_dir = config["data"]["eval_json"]
+    json_dir = config["data"]["eval_json_dir"]
     all_jsons = [os.path.join(json_dir, f) for f in os.listdir(json_dir) if f.endswith(".json")]
-
+    # print(all_jsons)
     for path in all_jsons:
-        seq = load_json_to_dataform(path)
+        seq, label = load_json_to_dataform(path)
         if len(seq) < config["data"]["window_size"]:
             continue
-        dataset = Keypoint_dataset(seq, config["data"]["window_size"])
-        # print(len(dataset))
+        dataset = Keypoint_dataset(seq, config["data"]["window_size"], label=label)
+            # print(len(dataset))
         dataloader = DataLoader(dataset, batch_size=config["training"]["batch_size"], shuffle=True)
         
-        for batch in dataloader:
+        for batch, _ in dataloader:
             batch = batch.to(device)
+            # print(batch.shape)
             recon, mu, logvar = model(batch)
             loss, _, _ = vae_loss(recon, batch, mu, logvar,
                             beta=config["training"]["beta"],
@@ -69,6 +70,11 @@ def train_vae(cfg_path='../cfg/time_series_vae.yaml'):
     optimizer = optim.AdamW(model.parameters(), lr=config["training"]["learning_rate"])
 
     for epoch in range(config["training"]["num_epochs"]):
+        
+        if epoch % config["training"]["eval_interval"] == 0:
+            print(f"Evaluating VAE at epoch {epoch}...")
+            eval_vae(model, config)
+        
         model.train()
         total_loss = 0
         lr = get_lr(config, epoch)
