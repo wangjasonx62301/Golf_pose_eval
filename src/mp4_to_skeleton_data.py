@@ -8,7 +8,7 @@ import yaml
 import json
 from sklearn.impute import KNNImputer
 import pandas as pd
-from preprocessing_json import preprocessing_json, preprocessing_json_with_linear_interpolation
+from src.preprocessing_json import preprocessing_json, preprocessing_json_with_linear_interpolation
 
 def check_path_exist(path):
     
@@ -16,7 +16,7 @@ def check_path_exist(path):
         raise argparse.ArgumentTypeError(f'Error : Path {path} not exist')
     return path
 
-def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_folder_path=None, model_name='yolo11n-pose.pt'):
+def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_folder_path=None, model_name='yolo11n-pose.pt', label=None):
     model = YOLO(model_name)
     cap = cv2.VideoCapture(input_video_path)
 
@@ -27,6 +27,7 @@ def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
+    label = label
 
     os.makedirs(output_folder_path, exist_ok=True)
 
@@ -37,7 +38,8 @@ def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_
         "video_info": {
             "width": frame_width,
             "height": frame_height,
-            "fps": fps
+            "fps": fps,
+            "label": label
         },
         "frames": []
     }
@@ -114,41 +116,41 @@ def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_
 
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Output skeleton video using YOLOv11.")
-    parser.add_argument("--input_video_dir", type=str, help="Path to golf mp4.")
-    parser.add_argument("--output_path", type=str, default=None, help="Directory to save the skeleton videos.")
-    parser.add_argument('--skeleton_config', type=str, default=None, help='Skeleton Connection')
+# def main():
+#     parser = argparse.ArgumentParser(description="Output skeleton video using YOLOv11.")
+#     parser.add_argument("--input_video_dir", type=str, help="Path to golf mp4.")
+#     parser.add_argument("--output_path", type=str, default=None, help="Directory to save the skeleton videos.")
+#     parser.add_argument('--skeleton_config', type=str, default=None, help='Skeleton Connection')
 
-    args = parser.parse_args()
+#     args = parser.parse_args()
 
-    with open(args.skeleton_config, 'r') as f:
-        config = yaml.safe_load(f)
-        SKELETON_CONNECTIONS = config.get('skeleton_connections')
-        if SKELETON_CONNECTIONS is None:
-            raise ValueError("Cannot find skeleton connections")
+#     with open(args.skeleton_config, 'r') as f:
+#         config = yaml.safe_load(f)
+#         SKELETON_CONNECTIONS = config.get('skeleton_connections')
+#         if SKELETON_CONNECTIONS is None:
+#             raise ValueError("Cannot find skeleton connections")
 
 
 
-    for filename in os.listdir(args.input_video_dir):
-        if filename.lower().endswith('.mp4'):
-            input_video_path = os.path.join(args.input_video_dir, filename)
-            get_single_skeleton(skeleton_connection=SKELETON_CONNECTIONS, input_video_path=input_video_path, output_folder_path=args.output_path)
+#     for filename in os.listdir(args.input_video_dir):
+#         if filename.lower().endswith('.mp4'):
+#             input_video_path = os.path.join(args.input_video_dir, filename)
+#             get_single_skeleton(skeleton_connection=SKELETON_CONNECTIONS, input_video_path=input_video_path, output_folder_path=args.output_path)
             
-    print('Finish processing video.')
+#     print('Finish processing video.')
              
-    for json_file in os.listdir(args.output_path):
-        if json_file.lower().endswith('.json'):
-            input_json_path = os.path.join(args.output_path, json_file)
-            preprocessing_json_with_linear_interpolation(input_json_path=input_json_path, output_json_path=input_json_path)
+#     for json_file in os.listdir(args.output_path):
+#         if json_file.lower().endswith('.json'):
+#             input_json_path = os.path.join(args.output_path, json_file)
+#             preprocessing_json_with_linear_interpolation(input_json_path=input_json_path, output_json_path=input_json_path)
             
-    for json_file in os.listdir(args.output_path):
-        if json_file.lower().endswith('.json'):
-            input_json_path = os.path.join(args.output_path, json_file)
-            preprocessing_json(input_json_path=input_json_path, output_json_path=input_json_path)
+#     for json_file in os.listdir(args.output_path):
+#         if json_file.lower().endswith('.json'):
+#             input_json_path = os.path.join(args.output_path, json_file)
+#             preprocessing_json(input_json_path=input_json_path, output_json_path=input_json_path)
    
             
-    print('Finish processing json file.')
+#     print('Finish processing json file.')
     
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

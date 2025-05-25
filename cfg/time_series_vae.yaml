@@ -8,8 +8,10 @@ model:
 
 data:
   window_size: 8
-  json_dir: "../example_output"
+  video_script_json: "../dataset/dataset_"
+  json_dir: "../dataset/skeleton_data"
   eval_json_dir: "../eval_json"
+  skeleton_video_path: "../dataset/skeleton_data"
 
 training:
   batch_size: 8
@@ -20,6 +22,7 @@ training:
   warmup_iters: 300
   lr_decay_iters: 3000
   min_lr: 0.0001
-  iters: 5000
+  # iters: 5000
+  ckpt_path: "../ckpt/"
 
 device: "cuda"
