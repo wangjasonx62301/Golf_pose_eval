@@ -54,6 +54,7 @@ def get_lr(config, iters=None):
     coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio)) # coeff ranges 0..1
     return config["training"]["min_lr"] + coeff * (config["training"]["learning_rate"] - config["training"]["min_lr"])
 
+# may need fix
 def train_vae(cfg_path='../cfg/time_series_vae.yaml'):
     
     # ../cfg/time_series_vae.yaml

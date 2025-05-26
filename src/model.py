@@ -45,6 +45,7 @@ class Time_Series_VAE(nn.Module):
         recon = self.decode(z, x.size(1))
         return recon, mu, logvar
     
+    # inference, may need fix
     def predict_future_frames(self, x_init, n_future):
         preds = []
         current_seq = x_init.clone()  # (1, T, 51)
