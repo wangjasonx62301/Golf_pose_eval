@@ -17,4 +17,10 @@ pip install -r requirements.txt
 ```bash
 cd scr
 
-python mp4_to_skeleton_data.py --input_video_dir your_input_folder_path --output_path your_output_folder_path --skeleton_config ../cfg/pose_connection.yaml
+# python mp4_to_skeleton_data.py --input_video_dir your_input_folder_path --output_path your_output_folder_path --skeleton_config ../cfg/pose_connection.yaml
+
+python get_all_data.py --mode=1
+
+python train_vae.py --mode=1
+
+python train_classifier.py --mode=1

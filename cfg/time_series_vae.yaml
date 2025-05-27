@@ -10,8 +10,9 @@ data:
   window_size: 8
   video_script_json: "../dataset/dataset_"
   json_dir: "../dataset/skeleton_data"
-  eval_json_dir: "../dataset/skeleton_eval"
-  skeleton_video_path: "../dataset/skeleton_data"
+  eval_json_dir: "../dataset/skeleton_eval_1"
+  # skeleton_video_path: "../dataset/skeleton_data"
+  skeleton_video_base_path: "../dataset"
 
 training:
   batch_size: 8
