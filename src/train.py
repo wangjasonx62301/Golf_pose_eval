@@ -55,11 +55,13 @@ def get_lr(config, iters=None):
     return config["training"]["min_lr"] + coeff * (config["training"]["learning_rate"] - config["training"]["min_lr"])
 
 # may need fix
-def train_vae(cfg_path='../cfg/time_series_vae.yaml'):
-    
-    # ../cfg/time_series_vae.yaml
-    with open(cfg_path, "r") as f:
-        config = yaml.safe_load(f)
+def train_vae(cfg_path=None, config=None):
+
+    if config is None:
+        assert cfg_path is not None, "cfg_path or config must be provided"
+        with open(cfg_path, "r") as f:
+            config = yaml.safe_load(f)
+
         
     device = torch.device(config["device"])
 
@@ -119,10 +121,11 @@ def train_vae(cfg_path='../cfg/time_series_vae.yaml'):
         #     Need Fix Dataset First     #
         ##################################
         
-def train_classifier(vae_ckpt=None, cfg_path=None):
- 
-    with open(cfg_path, "r") as f:
-        config = yaml.safe_load(f)
+def train_classifier(vae_ckpt=None, cfg_path=None, config=None):
+    if config is None:
+        assert cfg_path is not None, "cfg_path or config must be provided"
+        with open(cfg_path, "r") as f:
+            config = yaml.safe_load(f)
     
     device = torch.device(config["device"])
 
