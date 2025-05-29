@@ -19,7 +19,7 @@ def main():
     with open(args.yaml_file, 'r') as f:
         config = yaml.safe_load(f)
 
-    config['data']['json_dir'] = os.path.join(config['data']['skeleton_video_base_path'], f"skeleton_data_{args.mode}")
+    config['data']['json_dir'] = os.path.join(config['data']['skeleton_video_base_path'], f"skeleton_data")
 
     model = train_vae(config=config)
 
