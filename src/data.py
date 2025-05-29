@@ -84,16 +84,19 @@ class Keypoint_dataset(Dataset):
         super().__init__()
         self.window_size = window_size
         self.sequences = []
-        for i in range(len(seq) - window_size + 1):
+        self.targets = [] 
+        for i in range(len(seq) - window_size): 
             self.sequences.append(seq[i:i+window_size])
+            self.targets.append(seq[i+window_size]) 
         self.sequences = torch.tensor(np.array(self.sequences), dtype=torch.float32)
+        self.targets = torch.tensor(np.array(self.targets), dtype=torch.float32).unsqueeze(1) 
         self.label = label
-        
+
     def __len__(self):
         return len(self.sequences)
-    
+
     def __getitem__(self, idx):
-        return self.sequences[idx], self.label
+        return self.sequences[idx], self.targets[idx], self.label
     
 
     

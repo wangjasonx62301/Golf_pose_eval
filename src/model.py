@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Time_Series_VAE(nn.Module):
     
     def __init__(self, config):
@@ -34,31 +35,51 @@ class Time_Series_VAE(nn.Module):
         std = torch.exp(0.5 * logvar)
         return mean + std * torch.randn_like(std)
     
-    def decode(self, z, seq_len):
-        h0 = self.decoder_input(z).unsqueeze(1).repeat(1, seq_len, 1)
-        out, _ = self.decoder_rnn(h0)
-        return self.output_layer(out)
+    def decode(self, z, seq_len, time_step: int = None):
+        base_decoder_input = self.decoder_input(z).unsqueeze(1) # (B, 1, hidden_dim)
+
+        if time_step is not None:
+
+            time_emb = torch.tensor([float(time_step) / seq_len], device=z.device, dtype=torch.float32).unsqueeze(0).unsqueeze(2)
+            decoder_input_at_step = base_decoder_input + time_emb # (B, 1, hidden_dim)
+            out, _ = self.decoder_rnn(decoder_input_at_step) # out: (B, 1, hidden_dim)
+            return self.output_layer(out) # recon: (B, 1, input_dim)
+        else:
+            
+            time_emb = torch.arange(seq_len, device=z.device, dtype=torch.float32).unsqueeze(0).unsqueeze(2) / seq_len
+            decoder_input_seq = base_decoder_input + time_emb # (B, seq_len, hidden_dim)
+            out, _ = self.decoder_rnn(decoder_input_seq) # out: (B, seq_len, hidden_dim)
+            return self.output_layer(out) # recon: (B, seq_len, input_dim)
     
     def forward(self, x):
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
-        recon = self.decode(z, x.size(1))
-        return recon, mu, logvar
-    
+
+        predicted_next_frame = self.decode(z, seq_len=x.size(1), time_step=x.size(1)) 
+
+        return predicted_next_frame, mu, logvar 
     # inference, may need fix
     def predict_future_frames(self, x_init, n_future):
         preds = []
-        current_seq = x_init.clone()  # (1, T, 51)
-        for _ in range(n_future):
+        current_seq = x_init.clone()  # (1, window_size, input_dim)
+        window_size = x_init.size(1) 
+        
+        for k in range(n_future): 
             with torch.no_grad():
                 mu, logvar = self.encode(current_seq)
                 z = self.reparameterize(mu, logvar)
-                h = self.decoder_input(z).unsqueeze(1)
-                out, _ = self.decoder_rnn(h)
-                pred = self.output_layer(out).squeeze(1)  # (1, 51)
-            preds.append(pred.squeeze(0).cpu())
-            current_seq = torch.cat([current_seq[:, 1:], pred.unsqueeze(1)], dim=1)
-        return torch.stack(preds)  # (n_future, 51)
+
+                pred_next_frame_output = self.decode(z, seq_len=window_size, time_step=window_size) 
+                # pred_next_frame_output: (1, 1, input_dim)
+                
+                preds.append(pred_next_frame_output.squeeze(1).squeeze(0).cpu()) 
+                
+                current_seq = torch.cat([current_seq[:, 1:], pred_next_frame_output], dim=1)
+
+
+        return torch.stack(preds)
+
+
     
 class MLP(nn.Module):
     
@@ -90,5 +111,5 @@ class Golf_Pose_Classifier(nn.Module):
         
         return logits
         
-        
+# class Transformer        
     

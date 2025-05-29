@@ -24,82 +24,50 @@ import torch.nn.functional as F
 #     return mse + beta * kl
 
 
-def vae_loss(recon_x, x, mu, logvar, beta=0.001, confidence_thresh=0.1):
-    """
-    計算 Time Series VAE 的加權損失函數。
-    重構損失僅針對關鍵點的 (x, y) 座標，並根據置信度進行加權。
-
-    Args:
-        recon_x (torch.Tensor): 模型重構的輸出。形狀為 (B, T, D_full)。
-                                D_full 應為 17 * 3 = 51。
-                                包含 (x, y, c) 的重構。
-        x (torch.Tensor): 原始輸入數據。形狀為 (B, T, D_full)。
-                          D_full 應為 17 * 3 = 51。
-                          包含真實的 (x, y, c)。
-        mu (torch.Tensor): 潛在空間的均值。形狀為 (B, latent_dim)。
-        logvar (torch.Tensor): 潛在空間方差的對數。形狀為 (B, latent_dim)。
-        beta (float): KL 散度的權重，用於平衡重構損失和 KL 散度。
-        confidence_thresh (float): 用於創建遮罩的置信度閾值。低於此閾值的關鍵點將具有較低的重構損失權重。
+def vae_loss(predicted_next_frame, target_next_frame, mu, logvar, beta=0.001, confidence_thresh=0.1, lambda_smooth=0.1):
+    # 參數名稱已根據新目標進行調整，以增加可讀性
+    # predicted_next_frame: 模型預測的下一幀 (形狀: B, 1, D_full)
+    # target_next_frame: 真實的下一幀 (形狀: B, 1, D_full)
+    # mu, logvar: 從輸入序列 (window_size 幀) 編碼而來，形狀為 (B, latent_dim)
     
-    Returns:
-        tuple: (total_loss, recon_loss_val, kl_loss_val)
-               total_loss: 總損失。
-               recon_loss_val: 重構損失的平均值。
-               kl_loss_val: KL 散度的平均值。
-    """
-    B, T, D_full = x.shape # D_full = num_keypoints * 3 (x, y, c)
+    B, T_frame, D_full = target_next_frame.shape # T_frame 在這裡將始終是 1 (因為是單幀)
     num_kpts = D_full // 3
-    device = x.device
+    device = target_next_frame.device
 
-    # 1. 提取原始 x, y 座標 和 置信度
-    # 將輸入張量重新塑形為 (B, T, num_kpts, 3) 以便於提取
-    x_reshaped = x.reshape(B, T, num_kpts, 3)
-    recon_x_reshaped = recon_x.reshape(B, T, num_kpts, 3)
+    # 重塑張量以便處理每個關鍵點的 x, y, c
+    target_reshaped = target_next_frame.view(B, T_frame, num_kpts, 3) # 形狀: (B, 1, num_kpts, 3)
+    predicted_reshaped = predicted_next_frame.view(B, T_frame, num_kpts, 3) # 形狀: (B, 1, num_kpts, 3)
 
-    # 提取真實的 x, y 座標
-    true_xy = x_reshaped[:, :, :, :2] # shape: (B, T, num_kpts, 2)
-    # 提取重構的 x, y 座標
-    recon_xy = recon_x_reshaped[:, :, :, :2] # shape: (B, T, num_kpts, 2)
+    true_xy = target_reshaped[..., :2]       # 真實的 x, y 座標
+    recon_xy = predicted_reshaped[..., :2]    # 預測的 x, y 座標
+    confidence = target_reshaped[..., 2]      # 使用目標幀的置信度進行加權
 
-    # 提取置信度 (用於權重計算)
-    confidence = x_reshaped[:, :, :, 2] # shape: (B, T, num_kpts)
+    # 重建損失 (Reconstruction Loss)
+    # 計算預測幀與目標幀之間的 L1 平滑損失，並根據置信度加權
+    weights = (confidence >= confidence_thresh).float()
+    weights_exp = weights.unsqueeze(-1).expand_as(true_xy) # 擴展權重以匹配 xy 維度
 
-    # 2. 創建權重/遮罩
-    # 將置信度轉換為浮點數，並根據閾值創建二元遮罩 (0 或 1)
-    # 你在預處理中已經將插值點的置信度設為 0.01
-    # 如果 confidence_thresh 設為 0.05 (例如)，那麼這些 0.01 的點就會被設為 0
-    weights = (confidence >= confidence_thresh).float() # shape: (B, T, num_kpts)
-    
-    # 擴展權重維度，使其與 true_xy 和 recon_xy 的 shape 匹配 (為每個 x,y 分量賦予相同權重)
-    weights_expanded = weights.unsqueeze(-1).expand_as(true_xy) # shape: (B, T, num_kpts, 2)
+    recon_loss_per_element = F.smooth_l1_loss(recon_xy, true_xy, reduction='none')
+    weighted_recon_loss_sum = (recon_loss_per_element * weights_exp).sum()
+    total_active_elements = weights_exp.sum().clamp(min=1.0) # 防止除以零
+    recon_loss_val = weighted_recon_loss_sum / total_active_elements
 
-    # 3. 計算加權重構損失 (推薦使用 Huber Loss / Smooth L1 Loss)
-    # reduction='none' 保留每個元素的損失
-    # 重構損失只針對 (x, y) 座標
-    # recon_loss_per_element = F.mse_loss(recon_xy, true_xy, reduction='none') # (B, T, num_kpts, 2)
-    recon_loss_per_element = F.smooth_l1_loss(recon_xy, true_xy, reduction='none') # (B, T, num_kpts, 2)
+    # KL 散度損失 (KL Divergence Loss)
+    # 這個損失與 Encoder 相關，mu 和 logvar 是從整個輸入序列 (window_size 幀) 中得出的
+    # 因此，正規化應該是除以批次大小 B
+    kl_loss_val = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / B # <--- 這裡已修正
 
-    # 將損失與權重相乘，然後求和並除以有效權重的總和 (避免除以零)
-    weighted_recon_loss = (recon_loss_per_element * weights_expanded).sum()
+    # 時間平滑損失 (Temporal Smoothness Loss)
+    # 在單幀預測的場景下，T_frame 將始終為 1，因此此處定義的平滑損失將不起作用 (始終為 0)
+    # 如果需要，可以重新設計一個新的平滑損失，例如比較輸入序列最後一幀與預測幀之間的平滑性
+    if T_frame > 1: # 此條件將永遠為 False
+        # 這部分邏輯已不適用於單幀預測，但為保持原函數結構，暫保留
+        pred_diff = recon_xy[:, 1:] - recon_xy[:, :-1]
+        true_diff = true_xy[:, 1:] - true_xy[:, :-1]
+        smooth_loss = F.smooth_l1_loss(pred_diff, true_diff, reduction='mean')
+    else:
+        smooth_loss = torch.tensor(0.0, device=device) # 始終為 0
 
-    # 計算有效權重的總和，用於正規化損失。
-    # 確保 `total_active_elements` 至少為 1，以避免除以零。
-    total_active_elements = weights_expanded.sum().clamp(min=1.0)
-    
-    # 正規化重構損失：將加權損失總和除以有效元素的總數
-    # 這樣得到的 recon_loss_val 才是每個有效元素的平均損失
-    recon_loss_val = weighted_recon_loss / total_active_elements
-
-    # 4. 計算 KL 散度損失 (與你原來的邏輯相同)
-    # 這裡的 logvar 和 mu 是從編碼器輸出，形狀通常是 (B, latent_dim)
-    kl_loss_val = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    
-    # 對 KL 散度進行批次平均 (或你需要的其他正規化)
-    # 如果你希望 KL 散度也與時間步長 T 相關，可以除以 B * T
-    # 但通常只除以 B 比較常見，表示每個樣本的平均 KL 散度
-    kl_loss_val /= B * T
-
-    # 5. 總損失
-    total_loss = recon_loss_val + beta * kl_loss_val
-
-    return total_loss, recon_loss_val, kl_loss_val
+    # 總損失
+    total_loss = recon_loss_val + beta * kl_loss_val + lambda_smooth * smooth_loss
+    return total_loss, recon_loss_val, kl_loss_val, smooth_loss

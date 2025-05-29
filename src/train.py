@@ -27,14 +27,17 @@ def eval_vae(model, config):
             # print(len(dataset))
         dataloader = DataLoader(dataset, batch_size=config["training"]["batch_size"], shuffle=True)
         
-        for batch, _ in dataloader:
-            batch = batch.to(device)
-            # print(batch.shape)
+        for batch, target, _ in dataloader:
+                
+            batch, target = batch.to(device), target.to(device)
+            predicted_next_frame, mu, logvar = model(batch)
             recon, mu, logvar = model(batch)
-            loss, _, _ = vae_loss(recon, batch, mu, logvar,
-                            beta=config["training"]["beta"],
-                            confidence_thresh=config["training"]["confidence_threshold"])
-
+            loss, recon_l, kl_l, smooth_l = vae_loss(
+                    predicted_next_frame, target, mu, logvar, 
+                    beta=0.0000001,
+                    confidence_thresh=config["training"]["confidence_threshold"],
+                    lambda_smooth=config["training"].get("lambda_smooth", 0.0) # 如果平滑損失不適用，可以設為 0
+            )
             total_loss += loss.item()
 
     print(f"Eval Loss: {total_loss:.4f}")
@@ -66,6 +69,8 @@ def train_vae(cfg_path=None, config=None):
     device = torch.device(config["device"])
 
     json_dir = config["data"]["json_dir"]
+    
+    print(json_dir)
     all_jsons = [os.path.join(json_dir, f) for f in os.listdir(json_dir) if f.endswith(".json")]
 
     model = Time_Series_VAE(config=config).to(device)
@@ -79,7 +84,7 @@ def train_vae(cfg_path=None, config=None):
             eval_vae(model, config)
         
         model.train()
-        total_loss = 0
+        total_loss, recon_total, kl_total, smooth_total = 0, 0, 0, 0
         lr = get_lr(config, epoch)
         for param_group in optimizer.param_groups:
             param_group['lr'] = lr
@@ -93,19 +98,32 @@ def train_vae(cfg_path=None, config=None):
             # print(len(dataset))
             dataloader = DataLoader(dataset, batch_size=config["training"]["batch_size"], shuffle=True)
             
-            for batch, _ in dataloader:
-                
-                batch = batch.to(device)
-                recon, mu, logvar = model(batch)
-                loss, _, _ = vae_loss(recon, batch, mu, logvar,
-                                beta=config["training"]["beta"],
-                                confidence_thresh=config["training"]["confidence_threshold"])
+            for batch, target, _ in dataloader:
+                criterion = nn.MSELoss()
+                batch, target = batch.to(device), target.to(device)
+                predicted_next_frame, mu, logvar = model(batch)
+                # print(predicted_next_frame.shape)
+                beta_start = config["training"].get("beta_start", 0.0)
+                beta_max = config["training"]["beta"]
+                beta_growth = config["training"].get("beta_growth", 0.01) 
+                beta = min(beta_start + epoch * beta_growth, beta_max)
+                # loss, recon_l, kl_l, smooth_l = vae_loss(
+                #     predicted_next_frame, target, mu, logvar, 
+                #     beta=beta,
+                #     confidence_thresh=config["training"]["confidence_threshold"],
+                #     lambda_smooth=config["training"].get("lambda_smooth", 0.0) # 如果平滑損失不適用，可以設為 0
+                # )
+                loss = criterion(predicted_next_frame, target)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
+                # recon_total += recon_l.item()
+                # kl_total += kl_l.item()
+                # smooth_total += smooth_l.item()
 
-        print(f"[Epoch {epoch+1:5d}] Loss: {total_loss:.4f}")
+        print(f"[Epoch {epoch+1:5d}] Total: {total_loss:.4f} | Recon: {recon_total:.4f} | KL: {kl_total:.4f} | Smooth: {smooth_total:.4f}")
+
         # break  # For now, just break after one epoch for testing
     ckpt_path = config["training"]["ckpt_path"]
     total_epochs = config["training"]["num_epochs"]
