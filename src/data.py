@@ -72,31 +72,53 @@ def load_json_to_dataform(path=None):
             # may need fix
             pt[0] /= data['video_info']['width']
             pt[1] /= data['video_info']['height']
-            flat.extend(pt)  # x, y, c
+            flat.extend((pt[0], pt[1]))  # x, y, c
             # print(flat)
         keypoints_seq.append(flat)
 
     keypoints_seq = np.array(keypoints_seq)  
-    return keypoints_seq, label
+    return keypoints_seq
 
 class Keypoint_dataset(Dataset):
-    def __init__(self, seq, window_size, label=None):
+    def __init__(self, seq, window_size):
         super().__init__()
         self.window_size = window_size
         self.sequences = []
-        self.targets = [] 
-        for i in range(len(seq) - window_size): 
-            self.sequences.append(seq[i:i+window_size])
-            self.targets.append(seq[i+window_size]) 
-        self.sequences = torch.tensor(np.array(self.sequences), dtype=torch.float32)
-        self.targets = torch.tensor(np.array(self.targets), dtype=torch.float32).unsqueeze(1) 
-        self.label = label
+        self.targets = []
+
+        for i in range(len(seq) - window_size):
+            self.sequences.append(seq[i:i + window_size])
+            self.targets.append(seq[i + window_size])  
+
+        self.sequences = torch.from_numpy(np.array(self.sequences)).float()
+        self.targets = torch.from_numpy(np.array(self.targets)).float()
 
     def __len__(self):
         return len(self.sequences)
 
     def __getitem__(self, idx):
-        return self.sequences[idx], self.targets[idx], self.label
+        return self.sequences[idx], self.targets[idx]
+    
+class MultiJSONKeypointDataset(Dataset):
+    def __init__(self, json_paths, window_size):
+        self.sequences = []
+        self.targets = []
+        all_jsons = [os.path.join(json_paths, f) for f in os.listdir(json_paths) if f.endswith(".json")]
+        for path in all_jsons:
+            keypoints_seq = load_json_to_dataform(path)
+
+            for i in range(len(keypoints_seq) - window_size):
+                self.sequences.append(keypoints_seq[i:i+window_size])
+                self.targets.append(keypoints_seq[i+window_size])
+
+        self.sequences = torch.from_numpy(np.array(self.sequences)).float()
+        self.targets = torch.from_numpy(np.array(self.targets)).float()
+
+    def __len__(self):
+        return len(self.sequences)
+
+    def __getitem__(self, idx):
+        return self.sequences[idx], self.targets[idx]
     
 
     

@@ -17,7 +17,8 @@ def load_initial_sequence(json_path, window_size):
             continue
         kp = frame["persons"][0]["keypoints"]
         flat = [v for pt in kp for v in pt]
-        keypoints_seq.append(flat)
+        
+        keypoints_seq.append(flat[:34])
 
     return np.array(keypoints_seq, dtype=np.float32), data["video_info"]
 
@@ -79,3 +80,38 @@ def draw_skeleton_video(json_path, skeleton_connections, output_path):
 
     out.release()
     print(f"skeleton video saved to: {output_path}")
+    
+
+def preds_to_json_format(preds, width, height, start_frame=0, default_confidence=0.0):
+    preds = preds.detach().cpu().numpy() if isinstance(preds, torch.Tensor) else preds
+    frames = []
+
+    for i, flat in enumerate(preds):
+        keypoints = []
+        for j in range(17):
+            x = float(flat[2 * j] * width)      # ⬅️ 確保是 Python float
+            y = float(flat[2 * j + 1] * height)
+            c = float(default_confidence)
+            keypoints.append([x, y, c])
+
+        frame_data = {
+            "frame": int(start_frame + i),
+            "persons": [
+                {
+                    "id": 0,
+                    "keypoints": keypoints
+                }
+            ]
+        }
+        frames.append(frame_data)
+    
+    return frames
+
+
+def save_prediction_as_json(pred_frames, video_info, save_path="output.json"):
+    json_data = {
+        "video_info": video_info,  # e.g. {"width": 1440, "height": 1080, "fps": 30.0}
+        "frames": pred_frames
+    }
+    with open(save_path, "w") as f:
+        json.dump(json_data, f, indent=2)

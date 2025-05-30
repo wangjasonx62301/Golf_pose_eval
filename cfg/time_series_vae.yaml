@@ -2,21 +2,25 @@ model:
   latent_dim: 32
   hidden_dim: 128
   rnn_type: "gru"
-  input_dim: 51
+  input_dim: 34
   num_classes: 2
   num_mlp_iter: 5
+  n_embd: 128
+  block_size: 256
+  num_layers: 6
+  num_heads: 8
 
 data:
-  window_size: 8
+  window_size: 32
   video_script_json: "../dataset/dataset_"
   json_dir: "../dataset/skeleton_data"
-  eval_json_dir: "../dataset/skeleton_eval_1"
+  eval_json_dir: "../dataset/skeleton_eval"
   # skeleton_video_path: "../dataset/skeleton_data"
   skeleton_video_base_path: "../dataset"
 
 training:
-  batch_size: 8
-  num_epochs: 100
+  batch_size: 4
+  num_epochs: 150
   learning_rate: 0.001
   beta: 0.001
   confidence_threshold: 0.1
@@ -25,6 +29,11 @@ training:
   min_lr: 0.0001
   # iters: 5000
   ckpt_path: "../ckpt/"
-  eval_interval: 50
+  eval_interval: 20
+  lambda_smooth: 0.1
+  beta: 0.01
+  beta_start: 0.0
+  beta_growth: 0.002
+
 
 device: "cuda"

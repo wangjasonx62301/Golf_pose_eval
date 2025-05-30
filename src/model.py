@@ -1,3 +1,4 @@
+from turtle import forward
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -112,4 +113,62 @@ class Golf_Pose_Classifier(nn.Module):
         return logits
         
 # class Transformer        
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, max_len=500):
+        super(PositionalEncoding, self).__init__()
+        self.encoding = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len).unsqueeze(1).float()
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * -(torch.log(torch.tensor(10000.0)) / d_model))
+        self.encoding[:, 0::2] = torch.sin(position * div_term)
+        self.encoding[:, 1::2] = torch.cos(position * div_term)
+        self.encoding = self.encoding.unsqueeze(0)  # (1, max_len, d_model)
+
+    def forward(self, x):
+        return x + self.encoding[:, :x.size(1), :].to(x.device)  # x: (B, T, D)
     
+class KeypointTransformer(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.input_dim = config['model']['input_dim']
+        self.positional_encoding = PositionalEncoding(config['model']['hidden_dim'])
+        self.input_proj = nn.Linear(self.input_dim, config['model']['hidden_dim'])
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=config['model']['hidden_dim'],
+            nhead=config['model']['num_heads'],
+        )
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=config['model']['num_layers'])
+        self.output_proj = nn.Linear(config['model']['hidden_dim'], config['model']['input_dim'])
+        
+    def forward(self, x):
+        # x: (B, T, D)
+        x = self.input_proj(x)
+        x = self.positional_encoding(x)
+        x = x.permute(1, 0, 2)
+        x = self.encoder(x)
+        x = x[-1]
+        x = self.output_proj(x)
+        return x
+
+    def predict_future(self, input_seq, future_steps, device='cpu'):
+        """
+        input_seq: Tensor of shape (1, T, D), must be 1 sample only
+        future_steps: how many future frames to predict
+        return: Tensor of shape (future_steps, D)
+        """
+        self.eval()
+        input_seq = input_seq.clone().detach().to(device)
+        generated = []
+
+        for _ in range(future_steps):
+            x = self.input_proj(input_seq)           # (1, T, hidden_dim)
+            x = self.positional_encoding(x)          # (1, T, hidden_dim)
+            x = x.permute(1, 0, 2)                   # (T, 1, hidden_dim)
+            x = self.encoder(x)                      # (T, 1, hidden_dim)
+            last = x[-1]                             # (1, hidden_dim)
+            pred = self.output_proj(last)            # (1, D)
+            generated.append(pred.squeeze(0))        # (D,)
+
+            pred_reshaped = pred.unsqueeze(0)        # (1, 1, D)
+            input_seq = torch.cat([input_seq[:, 1:, :], pred_reshaped], dim=1)  # (1, T, D)
+
+        return torch.stack(generated, dim=0)  # (future_steps, D)

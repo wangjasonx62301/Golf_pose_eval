@@ -56,3 +56,5 @@ if __name__ == "__main__":
     # print(seq)
     # dataset = Keypoint_dataset(seq, 8, label=label)
     # print(len(dataset))
+    # data = MultiJSONKeypointDataset(json_paths='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/skeleton_data', window_size=16)
+    # print(len(data))
