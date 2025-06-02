@@ -34,9 +34,10 @@ def main():
     train_data = []
     eval_data = []
     for item in data:
-        video_name = os.path.basename(item['video_name'])
-        match = re.match(r"(\\d+)", os.path.splitext(video_name)[0])
-        video_id = int(match.group(1)) if match else -1  
+        video_name = os.path.basename(item["video_name"])
+        base_name = os.path.splitext(video_name)[0]
+        m = re.search(r"(\d+)", base_name)
+        video_id = int(m.group(1)) if m else -1
         if 100 <= video_id < 300:
             eval_data.append(item)
         else:
