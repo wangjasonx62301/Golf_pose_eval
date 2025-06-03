@@ -384,7 +384,7 @@ def train_transformer_AR(ckpt=None, cfg_path=None, config=None):
                 ckpt_path = config["training"]["ckpt_path"]
                 total_epochs = config["training"]["num_epochs"]
                 os.makedirs(ckpt_path, exist_ok=True)
-                torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}.pt")
+                torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['n_heads']}.pt")
 
         pbar = tqdm(data_loader, desc=f"Epoch {epoch+1}/{config['training']['num_epochs']}")
 
@@ -414,5 +414,5 @@ def train_transformer_AR(ckpt=None, cfg_path=None, config=None):
 
     ckpt_path = config["training"]["ckpt_path"]
     os.makedirs(ckpt_path, exist_ok=True)
-    torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{total_loss:.4f}_epochs_{epoch+1}.pt")
+    torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['n_heads']}.pt")
     return model

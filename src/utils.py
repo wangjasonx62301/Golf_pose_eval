@@ -115,3 +115,35 @@ def save_prediction_as_json(pred_frames, video_info, save_path="output.json"):
     }
     with open(save_path, "w") as f:
         json.dump(json_data, f, indent=2)
+        
+def get_predicted_mp4_from_json_folder(model, config, json_folder, skeleton_connections, save_path):
+    
+    if not os.path.exists(config['data']['predicted_video_path']):
+        os.makedirs(config['data']['predicted_video_path'], exist_ok=True)
+    
+    if not os.path.exists(save_path):
+        os.makedirs(save_path, exist_ok=True)
+    
+    json_files = list(Path(json_folder).glob("*.json"))
+    
+    video_info = config.get('video_info')
+    
+    for json_file in json_files:
+        
+        x_np, _ = load_initial_sequence(str(json_file), config['data']['window_size'])
+
+        x_tensor = torch.tensor(x_np, dtype=torch.float32).unsqueeze(0).to('cuda')  # (1, T, 51)
+
+        predicted = model.predict_future(x_tensor, 150, 'cuda')
+        
+        pred_frames = preds_to_json_format(predicted, width=1440, height=1080, start_frame=config['data']['window_size'])
+        save_prediction_as_json(pred_frames, video_info, save_path=f'{save_path}/{json_file.stem}.json')
+    
+    json_files = list(Path(save_path).glob("*.json"))
+    
+    for json_file in json_files:
+        draw_skeleton_video(str(json_file), skeleton_connections['skeleton_connections'], f"{config['data']['predicted_video_path']}/{str(json_file)[-20:].replace('.json', '.mp4')}")
+        
+        
+        
+    print(f"All videos saved to {config['data']['predicted_video_path']}")
