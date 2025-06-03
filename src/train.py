@@ -227,7 +227,11 @@ def eval_transformer(model, config=None):
             batch_x, batch_y = batch_x.to(device), batch_y.to(device)
             output = model(batch_x)
             # print(f"Output shape: {output.shape}, Target shape: {batch_y.shape}")
-            loss = criterion(output, batch_y)
+
+            # loss = criterion(output, batch_y)
+            mask = (batch_y != 0.0).float()
+            loss = ((output - batch_y) ** 2 * mask).sum() / mask.sum()
+
             
             total_loss += loss.item() * batch_x.size(0)
     avg_loss = total_loss / len(data_loader.dataset)
@@ -288,7 +292,15 @@ def train_transformer(ckpt=None, cfg_path=None, config=None):
             
             optimizer.zero_grad()
             output = model(batch_x)
-            loss = criterion(output, batch_y)
+
+            # loss = criterion(output, batch_y)
+            mask = (batch_y != 0.0).float()
+            if mask.sum() == 0:
+                loss = torch.tensor(0.0, device=device)
+            else:
+                loss = ((output - batch_y) ** 2 * mask).sum() / mask.sum()
+
+
             loss.backward()
             optimizer.step()
             

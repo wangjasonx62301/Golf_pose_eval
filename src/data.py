@@ -70,8 +70,14 @@ def load_json_to_dataform(path=None):
         for pt in keypoints:
             # brute force normalize
             # may need fix
-            pt[0] /= data['video_info']['width']
-            pt[1] /= data['video_info']['height']
+            if pt[0] > 0 and pt[1] > 0 and not np.isnan(pt[0]) and not np.isnan(pt[1]):
+                pt[0] /= data['video_info']['width']
+                pt[1] /= data['video_info']['height']
+
+            else:
+                pt[0] = 0.0
+                pt[1] = 0.0
+
             flat.extend((pt[0], pt[1]))  # x, y, c
             # print(flat)
         keypoints_seq.append(flat)

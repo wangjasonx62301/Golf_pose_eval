@@ -63,6 +63,9 @@ def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_
             "persons": []
         }
 
+
+        conf_num = 0.3
+        
         for r in results:
             if r.keypoints:
                 keypoints = r.keypoints.xy.cpu().numpy()
@@ -78,8 +81,12 @@ def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_
 
                     for i, (x, y) in enumerate(person_kpts):
                         conf = person_confs[i]
-                        person_data["keypoints"].append([float(x), float(y), float(conf)])
-                        if conf > 0.3 and x > 0 and y > 0:
+                        if conf > conf_num and not np.isnan(x) and not np.isnan(y) and x > 0 and y > 0:
+                            person_data["keypoints"].append([float(x), float(y), float(conf)])
+                        else:
+                            person_data["keypoints"].append([0.0, 0.0, 0.0])
+
+                        if conf > conf_num and x > 0 and y > 0:
                             cv2.circle(skeleton_frame, (int(x + dx), int(y + dy)), 4, (0, 0, 255), -1)
 
                     for i, j in skeleton_connection:
@@ -89,8 +96,8 @@ def get_single_skeleton(skeleton_connection=None, input_video_path=None, output_
                             c1, c2 = person_confs[i], person_confs[j]
 
                             if (
-                                c1 is not None and c1 > 0.3 and not np.isnan(x1) and not np.isnan(y1) and
-                                c2 is not None and c2 > 0.3 and not np.isnan(x2) and not np.isnan(y2) and 
+                                c1 is not None and c1 > conf_num and not np.isnan(x1) and not np.isnan(y1) and
+                                c2 is not None and c2 > conf_num and not np.isnan(x2) and not np.isnan(y2) and 
                                 x1 > 0 and y1 > 0 and x2 > 0 and y2 > 0
                             ):
                                 pt1 = (int(x1 + dx), int(y1 + dy))
