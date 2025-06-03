@@ -17,6 +17,7 @@ data:
   eval_json_dir: "../dataset/skeleton_eval"
   # skeleton_video_path: "../dataset/skeleton_data"
   skeleton_video_base_path: "../dataset"
+  predicted_video_path: "../dataset/predicted_video"
 
 training:
   batch_size: 4
@@ -37,3 +38,8 @@ training:
 
 
 device: "cuda"
+
+video_info:
+  width: 1440
+  height: 1080
+  fps: 30.0
