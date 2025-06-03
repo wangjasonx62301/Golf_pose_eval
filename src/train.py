@@ -333,7 +333,7 @@ def eval_transformer_AR(model, config=None):
     with torch.no_grad():
         for batch_x, batch_mask, batch_y in pbar:
             batch_x, batch_mask, batch_y = batch_x.to(device), batch_mask.to(device), batch_y.to(device)
-            output = model(batch_x, mask=batch_mask)  # ➕ 加上 mask
+            output = model(batch_x, mask=batch_mask) 
             loss = criterion(output, batch_y)
             
             total_loss += loss.item() * batch_x.size(0)
@@ -395,7 +395,13 @@ def train_transformer_AR(ckpt=None, cfg_path=None, config=None):
 
             optimizer.zero_grad()
             output = model(batch_x, mask=batch_mask)  # ➕ 加上 mask
-            loss = criterion(output, batch_y)
+            # loss = criterion(output, batch_y)
+            mask = (batch_y != 0.0).float()
+            if mask.sum() == 0:
+                loss = torch.tensor(0.0, device=device)
+            else:
+                loss = ((output - batch_y) ** 2 * mask).sum() / mask.sum()
+                
             loss.backward()
             optimizer.step()
 
