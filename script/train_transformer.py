@@ -6,7 +6,7 @@ import yaml
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
-from src.train import train_transformer
+from src.train import train_transformer, train_transformer_AR
 
 
 
@@ -22,7 +22,7 @@ def main():
     config['data']['json_dir'] = os.path.join(config['data']['skeleton_video_base_path'], f"skeleton_data")
     config['data']['eval_json_dir'] = os.path.join(config['data']['skeleton_video_base_path'], f"skeleton_eval")
 
-    model = train_transformer(cfg_path=None, config=config)
+    model = train_transformer_AR(cfg_path=None, config=config)
     
 if __name__ == '__main__':
     main()

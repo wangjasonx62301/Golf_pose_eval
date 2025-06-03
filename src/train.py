@@ -4,7 +4,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from src.model import KeypointTransformer, Time_Series_VAE, Golf_Pose_Classifier
-from src.data import MultiJSONKeypointDataset, load_json_to_dataform, Keypoint_dataset
+from src.data import MultiJSONKeypointDataset, load_json_to_dataform, Keypoint_dataset, AutoRegressiveKeypointDataset
 from src.loss import vae_loss
 import os
 import math
@@ -318,6 +318,95 @@ def train_transformer(ckpt=None, cfg_path=None, config=None):
         #         os.makedirs(ckpt_path)
     torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{total_loss:.4f}_epochs_{total_epochs}.pt")
     return model
-        
 
-    
+def eval_transformer_AR(model, config=None):
+    model.eval()
+    device = torch.device(config["device"])
+    criterion = nn.MSELoss()
+    data_loader = DataLoader(
+        AutoRegressiveKeypointDataset(config["data"]["json_dir"]),
+        batch_size=config["training"]["batch_size"],
+        shuffle=True
+    )
+    pbar = tqdm(data_loader, desc="Evaluating Transformer")
+    total_loss = 0
+    with torch.no_grad():
+        for batch_x, batch_mask, batch_y in pbar:
+            batch_x, batch_mask, batch_y = batch_x.to(device), batch_mask.to(device), batch_y.to(device)
+            output = model(batch_x, mask=batch_mask)  # ➕ 加上 mask
+            loss = criterion(output, batch_y)
+            
+            total_loss += loss.item() * batch_x.size(0)
+    avg_loss = total_loss / len(data_loader.dataset)
+    print(f"Eval Loss: {avg_loss:.4f}, Total Loss: {total_loss:.4f}")
+    return avg_loss
+
+def train_transformer_AR(ckpt=None, cfg_path=None, config=None):
+   
+
+    if config is None:
+        assert cfg_path is not None, "cfg_path or config must be provided"
+        with open(cfg_path, "r") as f:
+            config = yaml.safe_load(f)
+
+    device = torch.device(config["device"])
+    model = KeypointTransformer(config=config).to(device)
+
+    if ckpt is not None:
+        model.load_state_dict(torch.load(ckpt))
+        print(f"Loaded Transformer from {ckpt}")
+    else:
+        print("Training Transformer from scratch")
+
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=config['training']['learning_rate'])
+
+    best_loss = float('inf')
+    model.train()
+
+    dataset = AutoRegressiveKeypointDataset(
+        json_paths=config["data"]["json_dir"],
+    )
+    data_loader = DataLoader(dataset, batch_size=config["training"]["batch_size"], shuffle=True)
+
+    for epoch in range(config["training"]["num_epochs"]):
+        total_loss = 0
+
+        lr = get_lr(config, epoch)
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = lr
+
+        if (epoch % config["training"]["eval_interval"] == 0 and epoch > 0) or epoch == config["training"]["num_epochs"] - 1:
+            print(f"Evaluating Transformer at epoch {epoch}...")
+            eval_loss = eval_transformer_AR(model, config)
+            if eval_loss < best_loss:
+                best_loss = eval_loss
+                ckpt_path = config["training"]["ckpt_path"]
+                total_epochs = config["training"]["num_epochs"]
+                os.makedirs(ckpt_path, exist_ok=True)
+                torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}.pt")
+
+        pbar = tqdm(data_loader, desc=f"Epoch {epoch+1}/{config['training']['num_epochs']}")
+
+        for batch_x, batch_mask, batch_y in pbar:
+            batch_x = batch_x.to(device)            # (B, T, D)
+            batch_mask = batch_mask.to(device)      # (B, T)
+            batch_y = batch_y.to(device)            # (B, D)
+
+            optimizer.zero_grad()
+            output = model(batch_x, mask=batch_mask)  # ➕ 加上 mask
+            loss = criterion(output, batch_y)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item() * batch_x.size(0)
+            pbar.set_description(f"Epoch {epoch+1}/{config['training']['num_epochs']} - Loss: {loss.item():.4f}")
+
+        pbar.close()
+        avg_loss = total_loss / len(data_loader.dataset)
+        print(f"[Epoch {epoch+1:3d}] Loss: {total_loss:.6f} | Avg: {avg_loss:.4f}")
+
+    ckpt_path = config["training"]["ckpt_path"]
+    os.makedirs(ckpt_path, exist_ok=True)
+    torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{total_loss:.4f}_epochs_{epoch+1}.pt")
+    return model

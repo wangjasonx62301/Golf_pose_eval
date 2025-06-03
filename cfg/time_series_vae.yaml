@@ -7,8 +7,8 @@ model:
   num_mlp_iter: 5
   n_embd: 128
   block_size: 256
-  num_layers: 6
-  num_heads: 8
+  num_layers: 8
+  num_heads: 4
 
 data:
   window_size: 32
@@ -20,12 +20,12 @@ data:
 
 training:
   batch_size: 4
-  num_epochs: 150
-  learning_rate: 0.001
+  num_epochs: 200
+  learning_rate: 0.0003
   beta: 0.001
   confidence_threshold: 0.1
-  warmup_iters: 300
-  lr_decay_iters: 3000
+  warmup_iters: 50
+  lr_decay_iters: 150
   min_lr: 0.0001
   # iters: 5000
   ckpt_path: "../ckpt/"

@@ -126,5 +126,43 @@ class MultiJSONKeypointDataset(Dataset):
     def __getitem__(self, idx):
         return self.sequences[idx], self.targets[idx]
     
+class AutoRegressiveKeypointDataset(Dataset):
+    def __init__(self, json_paths, min_input_len=32, max_input_len=180):
+        self.samples = []
 
-    
+        all_jsons = [os.path.join(json_paths, f) for f in os.listdir(json_paths) if f.endswith(".json")]
+
+        for path in all_jsons:
+            keypoints_seq = load_json_to_dataform(path)  # shape: (T, 34)
+
+            T = len(keypoints_seq)
+            for i in range(min_input_len, min(T, max_input_len)):
+                input_seq = keypoints_seq[:i]       # shape: (i, 34)
+                target = keypoints_seq[i]           # shape: (34,)
+                self.samples.append((input_seq, target))
+
+        # find max input length to pad to
+        self.max_len = max_input_len
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        input_seq, target = self.samples[idx]
+        seq_len = input_seq.shape[0]
+        
+        # Zero-padding to max length
+        padded = np.zeros((self.max_len, input_seq.shape[1]), dtype=np.float32)
+        padded[:seq_len] = input_seq
+
+        # attention mask for transformer (1 = real token, 0 = padding)
+        mask = np.zeros(self.max_len, dtype=np.float32)
+        mask[:seq_len] = 1.0
+
+        return (
+            torch.tensor(padded),           # input_seq: (max_len, 34)
+            torch.tensor(mask),            # attention_mask: (max_len,)
+            torch.tensor(target).float()   # target: (34,)
+        )
+
+

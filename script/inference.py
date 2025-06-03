@@ -11,9 +11,9 @@ with open('../cfg/time_series_vae.yaml', 'r') as f:
     config = yaml.safe_load(f)
 
 model = KeypointTransformer(config).to('cuda')
-model.load_state_dict(torch.load('/home/jasonx62301/for_python/Golf/Golf_pose_eval/ckpt/KeypointTransformer_10.4330_epochs_150.pt'))
+model.load_state_dict(torch.load('/home/jasonx62301/for_python/Golf/Golf_pose_eval/ckpt/KeypointTransformer_1.9242_epochs_200.pt'))
 
-x_np, _ = load_initial_sequence('/home/jasonx62301/for_python/Golf/Golf_pose_eval/example_output/keypoints_081-1.json', config['data']['window_size'])
+x_np, _ = load_initial_sequence('/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/skeleton_data/keypoints_015-1.json', config['data']['window_size'])
 
 x_tensor = torch.tensor(x_np, dtype=torch.float32).unsqueeze(0).to('cuda')  # (1, T, 51)
 

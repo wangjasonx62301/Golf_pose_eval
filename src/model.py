@@ -1,3 +1,4 @@
+from math import e
 from turtle import forward
 import torch
 import torch.nn as nn
@@ -139,12 +140,17 @@ class KeypointTransformer(nn.Module):
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=config['model']['num_layers'])
         self.output_proj = nn.Linear(config['model']['hidden_dim'], config['model']['input_dim'])
         
-    def forward(self, x):
+    def forward(self, x, mask=None):
         # x: (B, T, D)
         x = self.input_proj(x)
         x = self.positional_encoding(x)
         x = x.permute(1, 0, 2)
-        x = self.encoder(x)
+        
+        if mask is not None:
+            x = self.encoder(x, src_key_padding_mask=mask)  # (T, B, hidden_dim)
+        else:  
+            x = self.encoder(x)
+            
         x = x[-1]
         x = self.output_proj(x)
         return x
