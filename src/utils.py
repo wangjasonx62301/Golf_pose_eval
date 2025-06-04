@@ -134,7 +134,7 @@ def get_predicted_mp4_from_json_folder(model, config, json_folder, skeleton_conn
 
         x_tensor = torch.tensor(x_np, dtype=torch.float32).unsqueeze(0).to('cuda')  # (1, T, 51)
 
-        predicted = model.predict_future(x_tensor, 150, 'cuda')
+        predicted = model.predict_future(x_tensor, 250, 'cuda')
         
         pred_frames = preds_to_json_format(predicted, width=1440, height=1080, start_frame=config['data']['window_size'])
         save_prediction_as_json(pred_frames, video_info, save_path=f'{save_path}/{json_file.stem}.json')

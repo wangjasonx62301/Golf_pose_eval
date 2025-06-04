@@ -230,7 +230,7 @@ def eval_transformer(model, config=None):
 
             # loss = criterion(output, batch_y)
             mask = (batch_y != 0.0).float()
-            loss = ((output - batch_y) ** 2 * mask).sum() / mask.sum()
+            loss = ((output - batch_y) ** 2 * mask).sum() 
 
             
             total_loss += loss.item() * batch_x.size(0)
@@ -238,7 +238,7 @@ def eval_transformer(model, config=None):
     print(f"Eval Loss: {avg_loss:.4f}, Total Loss: {total_loss:.4f}")
     return avg_loss
 
-def train_transformer(ckpt=None, cfg_path=None, config=None):
+def train_transformer(ckpt=None, cfg_path=None, config=None, mode=1):
     if config is None:
         assert cfg_path is not None, "cfg_path or config must be provided"
         with open(cfg_path, "r") as f:
@@ -283,7 +283,7 @@ def train_transformer(ckpt=None, cfg_path=None, config=None):
                 total_epochs = config["training"]["num_epochs"]
                 if not os.path.exists(ckpt_path):
                     os.makedirs(ckpt_path)
-                torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}.pt")
+                torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['num_heads']}_Mode_{mode}.pt")
         
         pbar = tqdm(data_loader, desc=f"Epoch {epoch+1}/{config['training']['num_epochs']}")
         
@@ -295,10 +295,15 @@ def train_transformer(ckpt=None, cfg_path=None, config=None):
 
             # loss = criterion(output, batch_y)
             mask = (batch_y != 0.0).float()
+            # print(mask)
             if mask.sum() == 0:
-                loss = torch.tensor(0.0, device=device)
+                print("Warning: No valid data in batch, skipping loss calculation.")
+                ones_mask = torch.ones_like(batch_y, device=device)  # Create a ones mask
+                mask = ones_mask - mask
+                # loss = torch.tensor(0.0, device=device)
+                loss = criterion(output, batch_y)
             else:
-                loss = ((output - batch_y) ** 2 * mask).sum() / mask.sum()
+                loss = ((output - batch_y) ** 2 * mask).sum() 
 
 
             loss.backward()
@@ -316,7 +321,7 @@ def train_transformer(ckpt=None, cfg_path=None, config=None):
         #     total_epochs = config["training"]["num_epochs"]
         #     if not os.path.exists(ckpt_path):
         #         os.makedirs(ckpt_path)
-    torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{total_loss:.4f}_epochs_{total_epochs}.pt")
+    torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['num_heads']}_Mode_{mode}.pt")
     return model
 
 def eval_transformer_AR(model, config=None):
@@ -341,7 +346,7 @@ def eval_transformer_AR(model, config=None):
     print(f"Eval Loss: {avg_loss:.4f}, Total Loss: {total_loss:.4f}")
     return avg_loss
 
-def train_transformer_AR(ckpt=None, cfg_path=None, config=None):
+def train_transformer_AR(ckpt=None, cfg_path=None, config=None, mode=None):
    
 
     if config is None:
@@ -384,7 +389,7 @@ def train_transformer_AR(ckpt=None, cfg_path=None, config=None):
                 ckpt_path = config["training"]["ckpt_path"]
                 total_epochs = config["training"]["num_epochs"]
                 os.makedirs(ckpt_path, exist_ok=True)
-                torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['n_heads']}.pt")
+                torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformerAR_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['num_heads']}_Mode_{mode}.pt")
 
         pbar = tqdm(data_loader, desc=f"Epoch {epoch+1}/{config['training']['num_epochs']}")
 
@@ -414,5 +419,5 @@ def train_transformer_AR(ckpt=None, cfg_path=None, config=None):
 
     ckpt_path = config["training"]["ckpt_path"]
     os.makedirs(ckpt_path, exist_ok=True)
-    torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformer_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['n_heads']}.pt")
+    torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformerAR_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['n_heads']}_Mode_{mode}.pt")
     return model

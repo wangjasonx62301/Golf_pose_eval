@@ -127,7 +127,7 @@ class MultiJSONKeypointDataset(Dataset):
         return self.sequences[idx], self.targets[idx]
     
 class AutoRegressiveKeypointDataset(Dataset):
-    def __init__(self, json_paths, min_input_len=32, max_input_len=180):
+    def __init__(self, json_paths, min_input_len=32, max_input_len=200):
         self.samples = []
 
         all_jsons = [os.path.join(json_paths, f) for f in os.listdir(json_paths) if f.endswith(".json")]

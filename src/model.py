@@ -166,6 +166,7 @@ class KeypointTransformer(nn.Module):
         generated = []
 
         for _ in range(future_steps):
+            # print(f'input_seq.shape = {input_seq.shape}')
             x = self.input_proj(input_seq)           # (1, T, hidden_dim)
             x = self.positional_encoding(x)          # (1, T, hidden_dim)
             x = x.permute(1, 0, 2)                   # (T, 1, hidden_dim)
@@ -175,6 +176,8 @@ class KeypointTransformer(nn.Module):
             generated.append(pred.squeeze(0))        # (D,)
 
             pred_reshaped = pred.unsqueeze(0)        # (1, 1, D)
-            input_seq = torch.cat([input_seq[:, 1:, :], pred_reshaped], dim=1)  # (1, T, D)
+            # input_seq = torch.cat([input_seq[:, 1:, :], pred_reshaped], dim=1)  # (1, T, D)
+            input_seq = torch.cat([input_seq, pred_reshaped], dim=1)  # (1, T, D)
+
 
         return torch.stack(generated, dim=0)  # (future_steps, D)

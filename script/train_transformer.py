@@ -1,3 +1,4 @@
+from ast import arg
 import sys
 import os
 import argparse
@@ -20,9 +21,9 @@ def main():
         config = yaml.safe_load(f)
 
     config['data']['json_dir'] = os.path.join(config['data']['skeleton_video_base_path'], f"skeleton_data")
-    config['data']['eval_json_dir'] = os.path.join(config['data']['skeleton_video_base_path'], f"skeleton_eval")
+    config['data']['eval_json_dir'] = os.path.join(config['data']['skeleton_video_base_path'], f"skeleton_eval_{args.mode}")
 
-    model = train_transformer_AR(cfg_path=None, config=config)
+    model = train_transformer(cfg_path=None, config=config, mode=args.mode)
     
 if __name__ == '__main__':
     main()

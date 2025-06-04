@@ -1,14 +1,14 @@
 model:
   latent_dim: 32
-  hidden_dim: 128
+  hidden_dim: 160
   rnn_type: "gru"
   input_dim: 34
   num_classes: 2
   num_mlp_iter: 5
   n_embd: 128
   block_size: 256
-  num_layers: 8
-  num_heads: 4
+  num_layers: 12
+  num_heads: 8
 
 data:
   window_size: 32
@@ -30,7 +30,7 @@ training:
   min_lr: 0.0001
   # iters: 5000
   ckpt_path: "../ckpt/"
-  eval_interval: 20
+  eval_interval: 10
   lambda_smooth: 0.1
   beta: 0.01
   beta_start: 0.0
