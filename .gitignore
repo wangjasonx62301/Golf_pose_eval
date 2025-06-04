@@ -4,6 +4,7 @@ __pycache__/
 *.mp4
 *.json
 *.zip
+*.pt
 
 !dataset/dataset_0.json
 !dataset/dataset_1.json
