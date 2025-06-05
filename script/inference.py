@@ -5,6 +5,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.utils import *
 from src.model import *
+from src.pose_extractor import *
 import yaml
 import argparse
 
@@ -13,7 +14,7 @@ def main():
     parser.add_argument("--yaml_file", type=str, default="../cfg/time_series_vae.yaml", help="Path to config yaml file")
     parser.add_argument("--skeleton_connection_file", type=str, default="../cfg/pose_connection.yaml", help="Path to skeleton connection config file")
     parser.add_argument("--mode", type=int, default=1, help="index 0,1,2")
-    parser.add_argument("--ckpt_path", type=str, default="/home/jasonx62301/for_python/Golf/Golf_pose_eval/ckpt/KeypointTransformerAR_0.0165_epochs_200_current_31_NumLayers_16_NumEmb_128_NumHead_8_Mode_1.pt", help="Path to the model checkpoint file")
+    parser.add_argument("--ckpt_path", type=str, default="/home/jasonx62301/for_python/Golf/Golf_pose_eval/ckpt/_CHose_KeypointTransformer_0.0041_epochs_200_current_200_NumLayers_8_NumEmb_128_NumHead_8_Mode_1.pt", help="Path to the model checkpoint file")
     parser.add_argument("--json_folder", type=str, default="/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/skeleton_eval", help="Path to the folder containing JSON files")
     parser.add_argument("--save_path", type=str, default="/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/skeleton_predict_json", help="Path to save the predicted JSON files")
     args = parser.parse_args()
@@ -33,7 +34,10 @@ def main():
             json_folder=f'{args.json_folder}_{args.mode}',
             skeleton_connections=skeleton_connection,
             save_path=f'{args.save_path}_{args.mode}',
+            mode=args.mode
         )
+    
+    inference_extracted_skeleton_videos(config, skeleton_connection['skeleton_connections'], mode=args.mode)
 
 if __name__ == '__main__': 
     main()

@@ -56,14 +56,18 @@ def draw_skeleton_video(json_path, skeleton_connections, output_path):
 
     for frame_info in frames_data:
         canvas = np.zeros((frame_size[1], frame_size[0], 3), dtype=np.uint8)
-
+        # add frame idx in top-right
+        # cv2.putText(canvas, f"Frame: {frame_info['frame']}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         for person in frame_info["persons"]:
             keypoints = person["keypoints"]
 
             # Draw keypoints
             for x, y, conf in keypoints:
-                
+                # add position information above the keypoint
+                # if conf > 0.3:  # Confidence threshold
                 cv2.circle(canvas, (int(x), int(y)), 4, (0, 0, 255), -1)
+                # cv2.putText(canvas, f"({int(x)}, {int(y)})", (int(x), int(y) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+
 
             # Draw skeleton lines
             for i, j in skeleton_connections:
@@ -82,16 +86,21 @@ def draw_skeleton_video(json_path, skeleton_connections, output_path):
     print(f"skeleton video saved to: {output_path}")
     
 
-def preds_to_json_format(preds, width, height, start_frame=0, default_confidence=0.0):
+def preds_to_json_format(preds, width, height, start_frame=0, default_confidence=0.0, norm=True):
     preds = preds.detach().cpu().numpy() if isinstance(preds, torch.Tensor) else preds
     frames = []
 
     for i, flat in enumerate(preds):
         keypoints = []
         for j in range(17):
-            x = float(flat[2 * j] * width)      # ⬅️ 確保是 Python float
-            y = float(flat[2 * j + 1] * height)
-            c = float(default_confidence)
+            if norm:
+                x = float(flat[2 * j] * width)      # ⬅️ 確保是 Python float
+                y = float(flat[2 * j + 1] * height)
+                c = float(default_confidence)
+            else:
+                x = float(flat[2 * j])
+                y = float(flat[2 * j + 1])
+                c = float(default_confidence)
             keypoints.append([x, y, c])
 
         frame_data = {
@@ -116,7 +125,7 @@ def save_prediction_as_json(pred_frames, video_info, save_path="output.json"):
     with open(save_path, "w") as f:
         json.dump(json_data, f, indent=2)
         
-def get_predicted_mp4_from_json_folder(model, config, json_folder, skeleton_connections, save_path):
+def get_predicted_mp4_from_json_folder(model, config, json_folder, skeleton_connections, save_path, mode):
     
     if not os.path.exists(config['data']['predicted_video_path']):
         os.makedirs(config['data']['predicted_video_path'], exist_ok=True)
@@ -142,7 +151,7 @@ def get_predicted_mp4_from_json_folder(model, config, json_folder, skeleton_conn
     json_files = list(Path(save_path).glob("*.json"))
     
     for json_file in json_files:
-        draw_skeleton_video(str(json_file), skeleton_connections['skeleton_connections'], f"{config['data']['predicted_video_path']}/{str(json_file)[-20:].replace('.json', '.mp4')}")
+        draw_skeleton_video(str(json_file), skeleton_connections['skeleton_connections'], f"{config['data']['predicted_video_path']}_{mode}/{str(json_file)[-20:].replace('.json', '.mp4')}")
         
         
         

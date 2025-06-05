@@ -7,6 +7,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset
+
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+
 from src.mp4_to_skeleton_data import get_single_skeleton
 
 def check_path_exist(path):
@@ -53,7 +59,7 @@ def get_skeleton_video_list_from_json(data=None, skeleton_connection=None, outpu
         
 
 
-def load_json_to_dataform(path=None):
+def load_json_to_dataform(path=None, norm=True):
 
     path = check_path_exist(path)
     
@@ -61,7 +67,7 @@ def load_json_to_dataform(path=None):
         data = json.load(f)
 
     frames = data["frames"]
-    label = data['video_info']['label']
+    # label = data['video_info']['label']
     keypoints_seq = []
     for frame in frames:
         person = frame["persons"][0]  
@@ -71,9 +77,13 @@ def load_json_to_dataform(path=None):
             # brute force normalize
             # may need fix
             if pt[0] > 0 and pt[1] > 0 and not np.isnan(pt[0]) and not np.isnan(pt[1]):
-                pt[0] /= data['video_info']['width']
-                pt[1] /= data['video_info']['height']
-
+                pt[0] = pt[0]
+                pt[1] = pt[1]
+                
+                if norm == True:
+                    pt[0] /= data['video_info']['width']
+                    pt[1] /= data['video_info']['height']
+    
             else:
                 pt[0] = 0.0
                 pt[1] = 0.0
