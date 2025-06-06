@@ -22,6 +22,9 @@ data:
   extracted_json_path: "../dataset/extracted_json"
   extracted_video_path: "../dataset/extracted_video"
   mode: 1 # default
+  inference_mode: 1 # 0 for inference, 1 for training
+  aligned_json_path: "../dataset/aligned_json"
+  combined_video_path: "../dataset/combined_video"
 
 training:
   batch_size: 4

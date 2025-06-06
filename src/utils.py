@@ -40,7 +40,7 @@ def convert_to_json(pred_tensor, start_frame=0):
 
 
 
-def draw_skeleton_video(json_path, skeleton_connections, output_path):
+def draw_skeleton_video(json_path, skeleton_connections, output_path, inference=0):
     with open(json_path, 'r') as f:
         keypoints_data = json.load(f)
 
@@ -65,7 +65,8 @@ def draw_skeleton_video(json_path, skeleton_connections, output_path):
             for x, y, conf in keypoints:
                 # add position information above the keypoint
                 # if conf > 0.3:  # Confidence threshold
-                cv2.circle(canvas, (int(x), int(y)), 4, (0, 0, 255), -1)
+                if x > 10 and y > 10:  # Filter out invalid points
+                    cv2.circle(canvas, (int(x), int(y)), 4, (0, 0, 255), -1)
                 # cv2.putText(canvas, f"({int(x)}, {int(y)})", (int(x), int(y) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
 
@@ -76,9 +77,14 @@ def draw_skeleton_video(json_path, skeleton_connections, output_path):
                     x2, y2, c2 = keypoints[j]
 
                     # if c1 > 0.3 and c2 > 0.3:
-                    pt1 = (int(x1), int(y1))
-                    pt2 = (int(x2), int(y2))
-                    cv2.line(canvas, pt1, pt2, (0, 255, 0), 2)
+                    if x1 > 10 and y1 > 10 and x2 > 10 and y2 > 10:  # Filter out invalid points
+                        pt1 = (int(x1), int(y1))
+                        pt2 = (int(x2), int(y2))
+                        # change color to red if inference
+                        if inference:
+                            cv2.line(canvas, pt1, pt2, (255, 0, 255), 2)
+                        else:
+                            cv2.line(canvas, pt1, pt2, (0, 255, 0), 2)
 
         out.write(canvas)
 
@@ -156,3 +162,79 @@ def get_predicted_mp4_from_json_folder(model, config, json_folder, skeleton_conn
         
         
     print(f"All videos saved to {config['data']['predicted_video_path']}")
+    
+def draw_source_and_target_together_in_one_video(source_json_path, target_json_path, skeleton_connections, output_path):
+    
+    with open(source_json_path, 'r') as f:
+        source_data = json.load(f)
+
+    with open(target_json_path, 'r') as f:
+        target_data = json.load(f)
+
+    video_info = source_data["video_info"]
+    frames_source = source_data["frames"]
+    frames_target = target_data["frames"]
+
+    frame_size = (video_info["width"], video_info["height"])
+    fps = video_info["fps"]
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(output_path, fourcc, fps, frame_size)
+
+    for frame_source, frame_target in zip(frames_source, frames_target):
+        canvas = np.zeros((frame_size[1], frame_size[0], 3), dtype=np.uint8)
+
+        # Draw source keypoints
+        for person in frame_source["persons"]:
+            keypoints = person["keypoints"]
+            for x, y, conf in keypoints:
+                if x > 10 and y > 10:  # Filter out invalid points
+                    cv2.circle(canvas, (int(x), int(y)), 4, (0, 0, 255), -1)
+
+            for i, j in skeleton_connections:
+                if i < len(keypoints) and j < len(keypoints):
+                    x1, y1, c1 = keypoints[i]
+                    x2, y2, c2 = keypoints[j]
+                    if x1 > 10 and y1 > 10 and x2 > 10 and y2 > 10:  # Filter out invalid points
+                        pt1 = (int(x1), int(y1))
+                        pt2 = (int(x2), int(y2))
+                        cv2.line(canvas, pt1, pt2, (0, 255, 0), 2)
+
+        # Draw target keypoints
+        for person in frame_target["persons"]:
+            keypoints = person["keypoints"]
+            for x, y, conf in keypoints:
+                if x > 10 and y > 10:  # Filter out invalid points
+                    cv2.circle(canvas, (int(x), int(y)), 4, (255, 0, 255), -1)
+
+            for i, j in skeleton_connections:
+                if i < len(keypoints) and j < len(keypoints):
+                    x1, y1, c1 = keypoints[i]
+                    x2, y2, c2 = keypoints[j]
+                    if x1 > 10 and y1 > 10 and x2 > 10 and y2 > 10:
+                        pt1 = (int(x1), int(y1))
+                        pt2 = (int(x2), int(y2))
+                        cv2.line(canvas, pt1, pt2, (255, 0, 255), 2)
+                        
+    
+        out.write(canvas) 
+    out.release()
+    print(f"Combined skeleton video saved to: {output_path}")
+    
+def draw_source_and_target_together_in_one_video_from_json_folder(source_json_folder, target_json_folder, skeleton_connections, output_path):
+    
+    source_json_files = list(Path(source_json_folder).glob("*.json"))
+    target_json_files = list(Path(target_json_folder).glob("*.json"))
+    
+    target_json_files = sorted(target_json_files, key=lambda x: int(x.name.split('-')[0].split('_')[1]))  # Sort by video index
+    source_json_files = sorted(source_json_files, key=lambda x: int(x.name.split('_')[1].split('-')[0]))  # Sort by video index
+    
+    for source_json_file, target_json_file in zip(source_json_files, target_json_files):
+        draw_source_and_target_together_in_one_video(
+            source_json_path=str(source_json_file),
+            target_json_path=str(target_json_file),
+            skeleton_connections=skeleton_connections,
+            output_path=f"{output_path}/{source_json_file.stem}_vs_{target_json_file.stem}.mp4"
+        )
+    
