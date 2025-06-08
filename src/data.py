@@ -1,4 +1,5 @@
 import json
+from logging import config
 import numpy as np
 import os
 import argparse
@@ -7,12 +8,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset
-
+import pandas as pd
 import sys
+import tiktoken
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-
+# from src.pose_criterion import *
 from src.mp4_to_skeleton_data import get_single_skeleton
 
 def check_path_exist(path):
@@ -175,4 +177,126 @@ class AutoRegressiveKeypointDataset(Dataset):
             torch.tensor(target).float()   # target: (34,)
         )
 
+def get_tokenizer():
+    return tiktoken.get_encoding("cl100k_base")
 
+def encode_text(text, tokenizer=None):
+    if tokenizer is None:
+        tokenizer = get_tokenizer()
+    return tokenizer.encode(text, allowed_special="all")
+
+def decode_text(token_ids, tokenizer=None):
+    """
+    Decode a sequence of token IDs back to text.
+    """
+    if tokenizer is None:
+        tokenizer = get_tokenizer()
+    
+    return tokenizer.decode(token_ids)
+
+def process_correction_dataset(csv_path):
+    df = pd.read_csv(csv_path)
+
+    dataset = []
+    for _, row in df.iterrows():
+        category = row["Category"].strip()
+        direction = row["CorrectionDirection"].strip()
+        correction = row["Correction"].strip()
+        if direction == "neutral/adjust": continue
+        input_text = f"Category: {category}; CorrectionDirection: {direction}"
+        target_text = correction
+
+        dataset.append({
+            "input": input_text,
+            "target": target_text
+        })
+    return dataset
+
+def df_to_text_sequence(df, tokenizer=None):
+    """
+    Convert a DataFrame to a text sequence.
+    Each row is converted to a string and then tokenized.
+    """
+    if tokenizer is None:
+        tokenizer = get_tokenizer()
+    
+    # extract text from "Correction" column if it existsdf = df.copy()
+    
+    text_sequence = []
+    # add end token in every period
+    for text in df:
+        # preserve index
+        # This is text format
+        # {
+        #     "input": "Category: Right Arm; CorrectionDirection: lower",
+        #     "target": "Keep your right arm tucked in."
+        # }
+        # concat input and target text
+        concat_text = f"{text['input']}, Correction: {text['target']}"
+        if concat_text:
+            tokens = encode_text(concat_text, tokenizer)
+            # Add end token to each text sequence
+            tokens.append(tokenizer.eot_token)
+            # Add begin token in very first token
+            tokens.insert(0, 100259)
+            text_sequence.append(tokens)
+        else:
+            text_sequence.append([])
+    
+    return text_sequence
+
+    
+def get_df(csv_path):
+    
+    csv_path = check_path_exist(csv_path)
+    return pd.read_csv(csv_path, encoding='utf-8', dtype=str).fillna('')
+
+def get_text_token_sequence_from_csv(csv_path, tokenizer=None):
+    """
+    Read a CSV file and convert the 'Correction' column to a text token sequence.
+    """
+    df = process_correction_dataset(csv_path)
+
+    return df_to_text_sequence(df, tokenizer)
+
+class AdviceDataset(Dataset):
+    def __init__(self, config, tokenizer, df):
+        
+        self.config = config
+        self.tokenizer = tokenizer
+        self.df = df
+        
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, idx):
+        
+        target = self.df[idx]
+        target = torch.tensor(target, dtype=torch.long)
+        
+        # padding
+        if len(target) < self.config['data']['max_seq_len']:
+            target = F.pad(target, (0, self.config['data']['max_seq_len'] - len(target)), value=self.config['data']['pad_token_id'])
+        else:
+            target = target[:self.config['data']['max_seq_len']]
+            
+        return target
+    
+def get_advice_batch(df, target_idx, config):
+    
+    if target_idx == None:
+        target_idx = np.random.randint(0, len(df) - 1)
+
+    ix = torch.randint(len(df[target_idx]) - config['advice_model']['block_size'], (config['advice_model']['batch_size'],))
+        
+    x = torch.stack([df[target_idx][i:i + config['advice_model']['block_size']] for i in ix], dim=0)
+    y = torch.stack([df[target_idx][i + 1:i + config['advice_model']['block_size'] + 1] for i in ix], dim=0)
+    x, y = x.to(config['data']['device']), y.to(config['data']['device'])
+    return x, y
+
+# class Pose_Advice_Keypoint_Label(Dataset):
+    
+#     def __init__(self, data):
+#         super().__init__()
+#         if data is None:
+#             self.data = get_df()

@@ -21,6 +21,8 @@ def arms_hip_distance(json_path, config=None):
     
     for i in range(len(df)):
         
+        inactivate_coordinates = (0, 0)
+        
         left_arms = (df[i][left_arms_idx[0]], df[i][left_arms_idx[1]])
         right_arms = (df[i][right_arms_idx[0]], df[i][right_arms_idx[1]])
         left_hip = (df[i][hip_idx[0][0]], df[i][hip_idx[0][1]])
@@ -28,9 +30,12 @@ def arms_hip_distance(json_path, config=None):
         
         # check positions of arms and hips
         # print(f"Frame {i}: Left Arms: {left_arms}, Right Arms: {right_arms}, Left Hip: {left_hip}, Right Hip: {right_hip}")
-        
-        left_distance = calculate_distance(left_arms, left_hip)
-        right_distance = calculate_distance(right_arms, right_hip)
+        if left_arms == inactivate_coordinates or right_arms == inactivate_coordinates or left_hip == inactivate_coordinates or right_hip == inactivate_coordinates:
+            left_distance = 0
+            right_distance = 0
+        else:
+            left_distance = calculate_distance(left_arms, left_hip)
+            right_distance = calculate_distance(right_arms, right_hip)
         
         total_distance = left_distance + right_distance
         # print(f"Frame {i}: Left Arms-Hip Distance: {left_distance}, Right Arms-Hip Distance: {right_distance}, Total: {total_distance}")
@@ -49,8 +54,8 @@ def extract_n_frames_after_before_highest_distance(target_json_path, source_json
     Extract n frames before and after the frame with the highest arms-hip distance.
     """
     frame_idx = arms_hip_distance(target_json_path, config)
-    source_frame_idx = frame_idx
-    # source_frame_idx = arms_hip_distance(source_json_path, config)
+    # source_frame_idx = frame_idx
+    source_frame_idx = arms_hip_distance(source_json_path, config)
     
     if frame_idx is None:
         print("No valid frame found.")
@@ -170,17 +175,19 @@ def pose_alignment(target_json_path, source_json_path, config=None, mode=None):
     target_data = load_json_to_dataform(target_json_path, norm=False)
     source_data = load_json_to_dataform(source_json_path, norm=False)
     
-    if len(target_data) != len(source_data):
-        print("Target and source data lengths do not match.")
-        return
+    # if len(target_data) != len(source_data):
+    #     print("Target and source data lengths do not match.")
+    #     return
     
     aligned_frames = []
     
-    fix_point_distance = 0
+    x_fix_point_distance = 0
+    y_fix_point_distance = 0
     # calculate the fix_point distance using right shoulder in the very first frame
-    right_shoulder_idx = 11
+    right_shoulder_idx = 6
     if len(target_data) > 0 and len(source_data) > 0 and source_data[0][right_shoulder_idx * 2] > 0:
-        fix_point_distance = source_data[0][right_shoulder_idx * 2] - target_data[0][right_shoulder_idx * 2]
+        x_fix_point_distance = source_data[0][right_shoulder_idx * 2] - target_data[0][right_shoulder_idx * 2]
+        y_fix_point_distance = source_data[0][right_shoulder_idx * 2 + 1] - target_data[0][right_shoulder_idx * 2 + 1]
     # print(f"Fix point distance: {fix_point_distance}")
     else: 
         print("Warning: Right shoulder position in the first frame of source data is not valid. Using default fix point distance of 0.")
@@ -188,7 +195,10 @@ def pose_alignment(target_json_path, source_json_path, config=None, mode=None):
     for i in range(len(target_data)):
         aligned_frame = {}
         for j in range(len(target_data[i])):
-                aligned_frame[j] = target_data[i][j] + fix_point_distance
+                if j % 2 == 0:
+                    aligned_frame[j] = target_data[i][j] + x_fix_point_distance
+                else:
+                    aligned_frame[j] = target_data[i][j] + y_fix_point_distance
         aligned_frames.append(aligned_frame)
     
     aligned_frames = preds_to_json_format(aligned_frames, width=1440, height=1080, start_frame=0, norm=False)

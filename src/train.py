@@ -1,10 +1,11 @@
+from pydoc import text
 import yaml
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import torch.nn as nn
-from src.model import KeypointTransformer, Time_Series_VAE, Golf_Pose_Classifier
-from src.data import MultiJSONKeypointDataset, load_json_to_dataform, Keypoint_dataset, AutoRegressiveKeypointDataset
+from src.model import KeypointTransformer, Time_Series_VAE, Golf_Pose_Classifier, AdviceTransformer
+from src.data import *
 from src.loss import vae_loss
 import os
 import math
@@ -44,7 +45,12 @@ def eval_vae(model, config):
     print(f"Eval Loss: {total_loss:.4f}")
     
 
-def get_lr(config, iters=None):
+def get_lr(config, iters=None, mode=None):
+    if mode == "advice_decoder":
+        config['training']['learning_rate'] = config['advice_model']['learning_rate']
+        config['training']['warmup_iters'] = config['advice_model']['warmup_iters']
+        config['training']['lr_decay_iters'] = config['advice_model']['lr_decay_iters']
+        config['training']['min_lr'] = config['advice_model']['min_lr']
     # print(config['training'])
     # 1) linear warmup for config['training']['warmup_iters'] steps
     if iters < config['training']['warmup_iters']:
@@ -421,3 +427,60 @@ def train_transformer_AR(ckpt=None, cfg_path=None, config=None, mode=None):
     os.makedirs(ckpt_path, exist_ok=True)
     torch.save(model.state_dict(), f"{ckpt_path}KeypointTransformerAR_{best_loss:.4f}_epochs_{total_epochs}_current_{epoch + 1}_NumLayers_{config['model']['num_layers']}_NumEmb_{config['model']['n_embd']}_NumHead_{config['model']['n_heads']}_Mode_{mode}.pt")
     return model
+
+def eval_advice_decoder(model, config=None):
+    # test generation
+    model.eval()
+    with torch.no_grad():
+        device = torch.device(config["device"])
+        text = model.generate_advice(max_new_tokens=32, input_seq=None)
+        print(f"Generated Advice: {text}")
+    
+
+
+def train_advice_decoder(ckpt=None, cfg_path=None, config=None):
+    if config is None:
+        assert cfg_path is not None, "cfg_path or config must be provided"
+        with open(cfg_path, "r") as f:
+            config = yaml.safe_load(f)
+
+    device = torch.device(config["device"])
+    model = AdviceTransformer(config=config).to(device)
+
+    if ckpt is not None:
+        model.load_state_dict(torch.load(ckpt))
+        print(f"Loaded AdviceDecoder from {ckpt}")
+    else:
+        print("Training AdviceDecoder from scratch")
+
+    model.train()
+    optimizer = optim.AdamW(model.parameters(), lr=config['training']['learning_rate'])
+    text_seq = get_text_token_sequence_from_csv(config["data"]["advice_csv_path"], get_tokenizer())
+    df = AdviceDataset(config=config, tokenizer=get_tokenizer(), df=text_seq)
+    
+    for iter in range(config['training']['max_iters']):
+        
+        lr = get_lr(config, iter, mode='advice_decoder')
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = lr
+        
+        if iter % config['training']['eval_interval'] == 0 and iter > 0:
+            print(f"Evaluating AdviceDecoder at iteration {iter}...")
+            eval_advice_decoder(model, config)
+            # eval_advice_decoder(model, config)  # Implement this function if needed
+        model.train()
+        
+        xb, yb = get_advice_batch(df=df, target_idx=None, config=config)
+        logits, loss = model(xb, yb)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        print(f"Iter {iter}, Loss: {loss.item():.4f}")
+        # break # For now, just break after one iteration for testing
+        
+    # save the model
+    ckpt_path = config["training"]["ckpt_path"]
+    total_iters = config["training"]["max_iters"]
+    if not os.path.exists(ckpt_path):
+        os.makedirs(ckpt_path)
+    torch.save(model.state_dict(), f"{ckpt_path}AdviceDecoder_{loss.item():.4f}_iters_{total_iters}.pt")

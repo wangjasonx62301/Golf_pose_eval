@@ -5,6 +5,12 @@ from pathlib import Path
 import cv2
 import os
 
+def check_path_exist(path):
+    
+    if not os.path.exists(path):
+        raise FileNotFoundError(f'Error: Path {path} does not exist')
+    return path
+
 def load_initial_sequence(json_path, window_size):
     with open(json_path, "r") as f:
         data = json.load(f)

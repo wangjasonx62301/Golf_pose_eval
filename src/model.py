@@ -1,9 +1,13 @@
 from math import e
 from turtle import forward
+from sympy import im
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from src.data import *
+from src.utils import *
+import math
+import regex as re
 
 class Time_Series_VAE(nn.Module):
     
@@ -181,3 +185,162 @@ class KeypointTransformer(nn.Module):
 
 
         return torch.stack(generated, dim=0)  # (future_steps, D)
+    
+  
+# from tiktoken import encoding_for_model
+  
+class SinusoidalEmbedding(nn.Module):
+    
+    def __init__(self, block_size, n_embd):
+        super().__init__()
+        self.emb_wei = torch.zeros(block_size, n_embd)
+        wei = torch.tensor([1 / 10000 ** (2 * j / n_embd) for j in range(n_embd)]).view(1, n_embd)
+        t = torch.arange(block_size).view(block_size, 1)
+        # even idx embedding
+        self.emb_wei[:, ::2] = torch.sin(t * wei[:, ::2])
+        self.emb_wei[:, 1::2] = torch.cos(t * wei[:, ::2])
+        
+        self.embedding = nn.Embedding(block_size, n_embd)
+        self.embedding.weight.data = self.emb_wei  
+        
+    def forward(self, x):
+        """
+        x: Tensor of shape (B, T)
+        return: Tensor of shape (B, T, n_embd)
+        """
+        return self.embedding(x)
+
+class MultiHeadAttention(nn.Module):
+    
+    def __init__(self, config):
+        super().__init__()
+        
+        self.n_embd = config['advice_model']['n_embd']
+        self.n_head = config['advice_model']['n_head']
+        
+        self.c_attn = nn.Linear(config['advice_model']['n_embd'], config['advice_model']['n_embd'] * 3)
+        self.c_proj = nn.Linear(config['advice_model']['n_embd'], config['advice_model']['n_embd'])
+        
+        self.register_buffer('bias', torch.tril(torch.ones(config['advice_model']['block_size'], config['advice_model']['block_size']))
+                             .view(1, 1, config['advice_model']['block_size'], config['advice_model']['block_size']))
+        
+    def forward(self, x):
+        # batch_size, Seq_len, embedding dim
+        B, T, C = x.shape
+        # print(x.shape)
+        # after c_attn(x), the shape is B, T, n_embd * 3
+        a = self.c_attn(x)
+        q, k, v = a.split(self.n_embd, dim=2)
+        # start view() & transpose()
+        # shape after transpose (Batch_size, n_head, Seq_len, n_embd // n_head) 
+        # or (B, n_head, T, C // n_head)
+        q = q.view(B, T, self.n_head, self.n_embd // self.n_head).transpose(2, 1)
+        k = k.view(B, T, self.n_head, self.n_embd // self.n_head).transpose(2, 1)
+        v = v.view(B, T, self.n_head, self.n_embd // self.n_head).transpose(2, 1)
+        # the formula : softmax(QK^T / sqrt(embd_dim(k)))V
+        # shape after q @ k : (B, n_head, T, T) 
+        attn = q @ k.transpose(-2, -1) * (1 / math.sqrt(self.n_embd * 3 // self.n_head))
+        # encoder
+        attn = attn.masked_fill(self.bias[:,:,:T,:T] == 0, float('-inf'))
+        attn = F.softmax(attn, dim=-1)
+        # shape after attn @ v : (B, n_head, T, C // n_head)
+        y = attn @ v
+        y = y.transpose(2, 1).contiguous().view(B, T, C)
+        self.out = self.c_proj(y)
+        return self.out   
+
+class FeedForward(nn.Module):
+    
+    def __init__(self, config, dropout=0.3):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(config['advice_model']['n_embd'], 4 * config['advice_model']['n_embd']),
+            nn.ReLU(),
+            nn.Linear(4 * config['advice_model']['n_embd'], config['advice_model']['n_embd']),
+            nn.Dropout(dropout),
+        )
+    
+    def forward(self, x):
+        return self.net(x)
+    
+class Block(nn.Module):
+    
+    def __init__(self, config):
+        super().__init__()
+        head_size = config['advice_model']['n_embd'] // config['advice_model']['n_head']
+        self.sa = MultiHeadAttention(config)
+        self.ffwd = FeedForward(config)
+        self.ln1 = nn.LayerNorm(config['advice_model']['n_embd'])
+        self.ln2 = nn.LayerNorm(config['advice_model']['n_embd'])
+        
+        
+    def forward(self, x):
+        # x shape (B, T, C)
+        x = x + self.sa(self.ln1(x))        # (B, T, C)
+        x = x + self.ffwd(self.ln2(x))      # (B, T, C)
+        return x
+
+class AdviceTransformer(nn.Module):
+    def __init__(self, config, tokenizer=None):
+        super().__init__()
+        self.config = config
+        self.tokenizer = tokenizer if tokenizer is not None else get_tokenizer()
+        self.token_embedding = nn.Embedding(config['advice_model']['vocab_size'], config['advice_model']['n_embd'])
+        self.positional_embedding = SinusoidalEmbedding(config['advice_model']['block_size'], config['advice_model']['n_embd'])
+        self.blocks = nn.Sequential(*[Block(config) for _ in range(config['advice_model']['n_layer'])])
+        self.lm_head = nn.Linear(config['advice_model']['n_embd'], config['advice_model']['vocab_size'], bias=False)
+        self.device = config['data']['device']
+        self.block_size = config['advice_model']['block_size']
+        
+    def forward(self, idx, targets=None):
+        B, T = idx.shape
+        assert T <= self.block_size, f"Cannot forward sequence of length {T}, block size is only {self.block_size}"
+        tok_emb = self.token_embedding(idx)  # (B, T, n_embd)
+        pos_emb = self.positional_embedding(torch.arange(T, device=self.device))
+        x = tok_emb + pos_emb
+        x = self.blocks(x)
+        logits = self.lm_head(x)
+        
+        if targets is None:
+            loss = None
+        else:
+            B, T, C = logits.shape
+            logits = logits.view(B * T, C)
+            targets = targets.view(B * T)
+            loss = F.cross_entropy(logits, targets, ignore_index=self.config['data']['pad_token_id'])
+        
+        return logits, loss
+    
+    def generate(self, idx, max_new_tokens):
+        """
+        idx: (B, T) tensor of input token indices
+        max_new_tokens: maximum number of new tokens to generate
+        """
+        for _ in range(max_new_tokens):
+            idx_cond = idx[:, -self.block_size:] # prevent longer than block size
+            logits, loss = self.forward(idx_cond)  # (B, T, vocab_size)
+            logits = logits[:, -1, :]  # (B, vocab_size)
+            probs = F.softmax(logits, dim=-1)  # (B, vocab_size)
+            idx_next = torch.multinomial(probs, num_samples=1)  # (B, 1)
+            idx = torch.cat((idx, idx_next), dim=1)  # (B, T + 1)
+            # if idx_next is end token, stop generating
+            if (idx_next == self.tokenizer.eot_token).any():
+                break
+        return idx
+    
+    def generate_advice(self, max_new_tokens, input_seq=None):
+        """
+        input_seq: Tensor of shape (B, T)
+        max_new_tokens: maximum number of new tokens to generate
+        """
+        if input_seq is None:
+            input_seq = '<|fim_middle|>'
+        advice = self.tokenizer.encode(input_seq, allowed_special={'<|fim_middle|>'})
+        advice = torch.tensor(advice, dtype=torch.long, device=self.device).unsqueeze(0)  # (1, T)
+        generated_ids = self.generate(advice, max_new_tokens)
+        # print(f"Generated IDs: {generated_ids}")
+        generated_ids = generated_ids.squeeze(0).tolist()
+        # print(f"Generated IDs after squeeze: {generated_ids}")
+        decoded_text = self.tokenizer.decode(generated_ids)
+        return decoded_text
+        # return advice

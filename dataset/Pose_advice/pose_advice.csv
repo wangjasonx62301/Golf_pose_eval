@@ -1,254 +1,153 @@
 Category,Correction,CorrectionDirection
-Head/Neck,"Keep your head still throughout the swing.",neutral/adjust
-Head/Neck,"Your eyes should be focused on the back of the ball at impact.",neutral/adjust
-Head/Neck,"Avoid lifting your head early (looking up).",lower
-Head/Neck,"Keep your chin up, not tucked into your chest.",higher
-Head/Neck,"Your head should remain in its original position until after impact.",neutral/adjust
-Head/Neck,"Prevent your chin from dipping too low.",higher
-Head/Neck,"Keep your vision fixed on the back of the ball.",neutral/adjust
-Head/Neck,"Maintain your eye level throughout the swing.",neutral/adjust
-Head/Neck,"Keep your eyes on the spot where the ball was.",neutral/adjust
-Head/Neck,"Your head should be positioned slightly behind the ball at address.",neutral/adjust
-Head/Neck,"Prevent your head from moving up or down.",neutral/adjust
-Head/Neck,"Maintain your head still over the ball.",neutral/adjust
-Head/Neck,"Your head should be positioned slightly behind the ball at address.",neutral/adjust
-Head/Neck,"Maintain your eye line on the ball.",neutral/adjust
-Head/Neck,"Maintain your head over the ball during the swing.",neutral/adjust
-Head/Neck,"Keep your head behind the ball.",neutral/adjust
-Head/Neck,"Prevent your head from lifting early.",lower
-Head/Neck,"Maintain your head still throughout the swing.",neutral/adjust
-Head/Neck,"Prevent your head from coming out of your posture too early.",lower
-Head/Neck,"Maintain your head over the ball during the swing.",neutral/adjust
-Head/Neck,"Keep your head behind the ball during the swing.",neutral/adjust
-
-Shoulders,"Square your shoulders to the target line.",neutral/adjust
-Shoulders,"Keep your left shoulder higher than your right at address.",higher
-Shoulders,"Your right shoulder should be lower than your left at address.",lower
-Shoulders,"Allow your shoulders to turn on an inclined plane.",neutral/adjust
-Shoulders,"Your right shoulder should be lower than your left at the top.",lower
-Shoulders,"Prevent your shoulders from rotating too flat.",neutral/adjust
-Shoulders,"Your right shoulder should be stable during the backswing.",neutral/adjust
-Shoulders,"Your shoulders should be slightly open at address.",neutral/adjust
-Shoulders,"Your shoulders should be slightly open at impact for a fade.",neutral/adjust
-Shoulders,"Your shoulders should be slightly closed at impact for a draw.",neutral/adjust
-Shoulders,"Your trail shoulder should come through under the lead shoulder.",lower
-Shoulders,"Ensure your right shoulder comes through the shot.",neutral/adjust
-Shoulders,"Keep your left shoulder higher than your right at impact.",higher
-Shoulders,"Allow your shoulders to be square at address.",neutral/adjust
-Shoulders,"Your shoulders should rotate on a steep plane.",neutral/adjust
-
-Elbows,"Prevent your left elbow from bending excessively.",neutral/adjust
-Elbows,"Allow your right elbow to tuck in closer to your body on the downswing.",lower
-Elbows,"At the top, the right elbow points more towards the ground.",lower
-Elbows,"Your elbows should be relatively close together at address.",neutral/adjust
-Elbows,"Allow your trail elbow to hinge naturally.",neutral/adjust
-Elbows,"Prevent your trail elbow from flying out.",lower
-Elbows,"Maintain the bend in your right elbow.",neutral/adjust
-Elbows,"Ensure your right elbow is close to your side.",lower
-Elbows,"Keep your right elbow pointing down.",lower
-Elbows,"Your right elbow should be leading the downswing.",neutral/adjust
-
-Wrists/Hands,"Ensure your wrists are uncocked at impact.",neutral/adjust
-Wrists/Hands,"Allow your left wrist to flatten at the top of the backswing.",neutral/adjust
-Wrists/Hands,"Your grip should be neutral, not too strong or too weak.",neutral/adjust
-Wrists/Hands,"Feel the clubhead weight in your hands.",neutral/adjust
-Wrists/Hands,"Don't grip the club too tightly; relax your hands.",neutral/adjust
-Wrists/Hands,"Ensure your hands are ahead of the ball at impact.",neutral/adjust
-Wrists/Hands,"Don't lift your hands too high on the backswing.",lower
-Wrists/Hands,"Keep your hands in front of your body.",neutral/adjust
-Wrists/Hands,"Maintain your wrist hinge until late in the downswing.",neutral/adjust
-Wrists/Hands,"Ensure your hands are directly over the ball at address.",neutral/adjust
-Wrists/Hands,"Keep your hands soft on the grip.",neutral/adjust
-Wrists/Hands,"Keep your left wrist flat or slightly bowed.",neutral/adjust
-Wrists/Hands,"Prevent your right wrist from cupping.",neutral/adjust
-Wrists/Hands,"Maintain the angle of your wrists as long as possible.",neutral/adjust
-Wrists/Hands,"Your hands should be low at the finish.",lower
-Wrists/Hands,"Your hands should be low at the takeaway.",lower
-Wrists/Hands,"Allow your hands to accelerate through impact.",neutral/adjust
-Wrists/Hands,"Your hands should be slightly forward at address.",neutral/adjust
-Wrists/Hands,"Your hands should lead the clubhead into impact.",neutral/adjust
-Wrists/Hands,"Your hands should be ahead of the club at impact.",neutral/adjust
-Wrists/Hands,"Allow your hands to release towards the target.",neutral/adjust
-Wrists/Hands,"Your hands should be slightly ahead of the clubface.",neutral/adjust
-Wrists/Hands,"Your hands should be slightly ahead of center.",neutral/adjust
-Wrists/Hands,"Your hands should finish high and left.",higher
-Wrists/Hands,"Your hands should be over your lead thigh at impact.",neutral/adjust
-Wrists/Hands,"Your hands should be passive on the takeaway.",neutral/adjust
-Wrists/Hands,"Your hands should work down and through.",neutral/adjust
-Wrists/Hands,"Allow your hands to hinge and unhinge freely.",neutral/adjust
-Wrists/Hands,"Your hands should be leading the clubhead.",neutral/adjust
-
-Hips,"Maintain a slight forward lean from your hips at address.",neutral/adjust
-Hips,"Keep your hips level at the top of the backswing.",neutral/adjust
-Hips,"Allow your hips to turn towards the target on the downswing.",neutral/adjust
-Hips,"Prevent your hips from sliding laterally.",neutral/adjust
-Hips,"Don't over-rotate your hips on the backswing.",neutral/adjust
-Hips,"Ensure your hips are square to the target at impact.",neutral/adjust
-Hips,"Allow your hips to turn fully on the follow-through.",neutral/adjust
-Hips,"Allow your lead hip to clear on the downswing.",neutral/adjust
-Hips,"Ensure your left hip moves back and up.",neutral/adjust
-Hips,"Your left hip should clear out of the way on the downswing.",neutral/adjust
-Hips,"Your left hip should clear out of the way for the downswing.",neutral/adjust
-Hips,"Your right hip should rotate around your left.",neutral/adjust
-Hips,"Ensure your left hip finishes over your left foot.",neutral/adjust
-Hips,"Allow your hips to clear completely.",neutral/adjust
-Hips,"Your left hip should be back and open.",neutral/adjust
-Hips,"Your left hip should rotate open at impact.",neutral/adjust
-Hips,"Prevent your left hip from swaying outwards.",neutral/adjust
-Hips,"Your left hip should turn towards the target.",neutral/adjust
-Hips,"Prevent your left hip from stalling.",neutral/adjust
-
-Knees,"Your knees should be slightly flexed, not locked.",neutral/adjust
-Knees,"Maintain your knee flex throughout the downswing.",neutral/adjust
-Knees,"Prevent your front knee from collapsing inward on the downswing.",neutral/adjust
-Knees,"Your right knee should flex slightly more on the downswing.",neutral/adjust
-Knees,"Keep your right knee flexed until impact.",neutral/adjust
-Knees,"Allow your lead knee to move slightly towards the target.",neutral/adjust
-Knees,"Your left knee should not lock at impact.",neutral/adjust
-Knees,"Allow your left knee to flex slightly.",neutral/adjust
-Knees,"Prevent your left knee from locking out.",neutral/adjust
-Knees,"Allow your right knee to kick in towards the target.",neutral/adjust
-Knees,"Prevent your left knee from wobbling.",neutral/adjust
-
-Ankles/Feet,"Feel your weight balanced on the balls of your feet.",neutral/adjust
-Ankles/Feet,"Ensure your weight is on the inside of your trail foot.",neutral/adjust
-Ankles/Feet,"Keep your left heel on the ground for as long as possible.",lower
-Ankles/Feet,"Your right heel should lift naturally on the backswing.",higher
-Ankles/Feet,"Ensure your right foot pivots towards the target.",neutral/adjust
-Ankles/Feet,"Feel grounded through your feet at setup.",neutral/adjust
-Ankles/Feet,"Your trail heel should lift and point at the target.",higher
-Ankles/Feet,"Allow your left foot to pivot towards the target.",neutral/adjust
-Ankles/Feet,"Allow your right foot to come up on its toe.",higher
-Ankles/Feet,"Prevent your weight from shifting to your toes.",neutral/adjust
-Ankles/Feet,"Maintain a stable base with your feet.",neutral/adjust
-Ankles/Feet,"Your right foot pushes off the ground.",neutral/adjust
-Ankles/Feet,"Your left foot should be slightly open at address.",neutral/adjust
-
-Torso/Spine,"Your spine should be tilted away from the target at setup.",neutral/adjust
-Torso/Spine,"Keep your chest over the ball at impact.",neutral/adjust
-Torso/Spine,"Ensure your back is straight, not rounded.",neutral/adjust
-Torso/Spine,"Feel a stretch in your hamstrings at setup.",neutral/adjust
-Torso/Spine,"Your upper body should rotate fully on the backswing.",neutral/adjust
-Torso/Spine,"Prevent swaying your torso during the swing.",neutral/adjust
-Torso/Spine,"Prevent an 'S' curve in your lower back.",neutral/adjust
-Torso/Spine,"Avoid a 'C' curve in your upper back.",neutral/adjust
-Torso/Spine,"Your spine angle should remain constant.",neutral/adjust
-Torso/Spine,"Rotate your chest fully towards the target on the follow-through.",neutral/adjust
-Torso/Spine,"Avoid reverse pivoting during your backswing.",neutral/adjust
-Torso/Spine,"Feel your core engaged throughout the swing.",neutral/adjust
-Torso/Spine,"Bend from your hips, not your waist.",neutral/adjust
-Torso/Spine,"Allow your body to coil on the backswing.",neutral/adjust
-Torso/Spine,"Uncoil your body on the downswing.",neutral/adjust
-Torso/Spine,"Prevent your body from standing up too early.",lower
-Torso/Spine,"Keep your sternum over the ball.",neutral/adjust
-Torso/Spine,"Maintain a good spine angle throughout the swing.",neutral/adjust
-Torso/Spine,"Allow your chest to face the target at the finish.",neutral/adjust
-Torso/Spine,"Prevent your lower back from arching too much.",neutral/adjust
-Torso/Spine,"Your chest rotates fully towards the target.",neutral/adjust
-Torso/Spine,"Maintain your spine angle through the impact zone.",neutral/adjust
-Torso/Spine,"Allow your body to turn, not sway.",neutral/adjust
-Torso/Spine,"Maintain your spine angle throughout the backswing.",neutral/adjust
-Torso/Spine,"Prevent your body from coming out of your posture.",neutral/adjust
-Torso/Spine,"Maintain your posture through impact.",neutral/adjust
-Torso/Spine,"Your left side should be firm at impact.",neutral/adjust
-
-General Posture/Balance,"Ensure your weight is evenly distributed at address.",neutral/adjust
-General Posture/Balance,"Find a comfortable athletic stance.",neutral/adjust
-General Posture/Balance,"Finish your swing in a balanced position.",neutral/adjust
-General Posture/Balance,"Maintain a good athletic posture from start to finish.",neutral/adjust
-General Posture/Balance,"Finish with your belt buckle facing the target.",neutral/adjust
-General Posture/Balance,"Maintain consistent posture throughout the swing.",neutral/adjust
-General Posture/Balance,"Finish tall and balanced on your lead foot.",neutral/adjust
-General Posture/Balance,"Ensure your balance is maintained throughout the swing.",neutral/adjust
-General Posture/Balance,"Finish with a full turn and balanced weight.",neutral/adjust
-General Posture/Balance,"Maintain your address posture at impact.",neutral/adjust
-General Posture/Balance,"Don't sway off the ball on your backswing.",neutral/adjust
-General Posture/Balance,"Finish with your club pointing at the target.",neutral/adjust
-General Posture/Balance,"Finish with your belly button facing the target.",neutral/adjust
-General Posture/Balance,"Maintain your posture through the entire swing.",neutral/adjust
-General Posture/Balance,"Maintain your balance on your left side at the finish.",neutral/adjust
-General Posture/Balance,"Maintain your balance on your front foot.",neutral/adjust
-General Posture/Balance,"Prevent your body from rocking back and forth.",neutral/adjust
-
-Weight Shift,"Ensure your weight shifts to your lead foot on the downswing.",neutral/adjust
-Weight Shift,"Your weight should shift from heel to toe during the swing.",neutral/adjust
-Weight Shift,"Shift your weight aggressively towards the target.",neutral/adjust
-Weight Shift,"Ensure your weight transfers to your left side.",neutral/adjust
-Weight Shift,"Prevent your weight from falling back on your heels.",neutral/adjust
-Weight Shift,"Ensure your balance is forward on your feet.",neutral/adjust
-
-Arms (General),"Maintain a good triangle with your arms at setup.",neutral/adjust
-Arms (General),"Your hands should hang directly below your shoulders.",neutral/adjust
-Arms (General),"Your arms should extend naturally away from your body.",neutral/adjust
-Arms (General),"Your arms should be relaxed, not tense.",neutral/adjust
-Arms (General),"Your elbows should be relatively close together at address.",neutral/adjust
-Arms (General),"Your arms should swing freely.",neutral/adjust
-Arms (General),"Feel the connection between your arms and body.",neutral/adjust
-Arms (General),"Your arms should extend down the target line after impact.",neutral/adjust
-Arms (General),"Your arms should be relaxed and hanging freely at address.",neutral/adjust
-Arms (General),"Prevent your arms from breaking down after impact.",neutral/adjust
-Arms (General),"Prevent your arms from separating from your body.",neutral/adjust
-Arms (General),"Your arms should extend down the target line after impact.",neutral/adjust
-
-Left Arm,"Keep your left arm straight throughout the backswing.",neutral/adjust
-Left Arm,"Ensure your left arm remains extended at the top of your backswing.",neutral/adjust
-Left Arm,"Your left arm should be fully extended during the takeaway.",neutral/adjust
-Left Arm,"For better width, your left arm needs to stay straight.",neutral/adjust
-Left Arm,"Your lead arm should be straight, but not stiff.",neutral/adjust
-Left Arm,"Keep your lead arm connected to your chest.",neutral/adjust
-Left Arm,"Keep your left arm straight, but not rigid.",neutral/adjust
-Left Arm,"Keep your left arm firm through impact.",neutral/adjust
-Left Arm,"Your left arm should be connected to your body.",neutral/adjust
+Left Shoulder,"Keep your left shoulder higher than your right at address.",higher
+Left Shoulder,"Your left shoulder should be higher than your right at impact.",higher
+Left Shoulder,"Your left shoulder should be higher than your right at the top of the backswing.",higher
+Left Shoulder,"Prevent your left shoulder from dropping too low.",higher
+Left Shoulder,"Ensure your left shoulder stays higher during the takeaway.",higher
+Left Shoulder,"Your left shoulder should be slightly higher than your right during the backswing.",higher
+Left Shoulder,"Maintain your left shoulder's height through the downswing.",higher
+Left Shoulder,"Your left shoulder should not dip below your right shoulder at address.",higher
+Left Shoulder,"Focus on keeping your left shoulder elevated during the backswing.",higher
+Left Shoulder,"Your left shoulder needs to stay above your right shoulder for proper tilt.",higher
+Left Shoulder,"Keep your left shoulder up and stable throughout the swing.",higher
+Left Shoulder,"Ensure your left shoulder doesn't collapse during the downswing.",higher
+Left Shoulder,"Your left shoulder should be higher than your right at the finish.",higher
+Left Shoulder,"To avoid shanking, keep your left shoulder higher.",higher
+Left Shoulder,"A higher left shoulder promotes a better angle of attack.",higher
+Left Shoulder,"Your left shoulder should be higher than your right at the point of extension.",higher
+Left Shoulder,"Work on keeping your left shoulder high for a wider swing arc.",higher
+Left Shoulder,"Your left shoulder should feel like it's lifting towards the target.",higher
+Left Shoulder,"Prevent your left shoulder from falling too low in the follow-through.",higher
+Left Shoulder,"Keep your left shoulder higher to encourage a full shoulder turn.",higher
+Left Shoulder,"Ensure your left shoulder remains high as you shift weight forward.",higher
+Left Shoulder,"Your left shoulder should be notably higher at the top of a full swing.",higher
+Left Shoulder,"Promote an ascending blow by keeping your left shoulder higher through impact.",higher
+Left Shoulder,"Your left shoulder should stay higher to prevent an outside-in swing path.",higher
+Left Shoulder,"Your left shoulder should be lower than your right at the top of the backswing.",lower
+Left Shoulder,"Allow your left shoulder to drop slightly in the downswing.",lower
+Left Shoulder,"Your left shoulder should finish lower than your right.",lower
+Left Shoulder,"Ensure your left shoulder rotates on a lower plane.",lower
+Left Shoulder,"Your left shoulder should be lower at the finish.",lower
+Left Shoulder,"Allow your left shoulder to dip on the downswing for more power.",lower
+Left Shoulder,"Your left shoulder should feel like it's rotating under your chin.",lower
+Left Shoulder,"Let your left shoulder naturally lower as you complete the swing.",lower
+Left Shoulder,"Your left shoulder should be lower than your right at the end of the follow-through.",lower
+Left Shoulder,"For a more inside-out path, allow your left shoulder to be lower at impact.",lower
+Left Shoulder,"Your left shoulder should be lower at address for a flatter swing plane.",lower
+Left Shoulder,"Prevent your left shoulder from rising too early in the downswing.",lower
+Left Shoulder,"Feel your left shoulder working down and through the ball.",lower
+Left Shoulder,"Your left shoulder needs to be lower than your right at impact to cover the ball.",lower
+Left Shoulder,"To shallow the club, allow your left shoulder to work lower.",lower
+Left Shoulder,"Your left shoulder should be lower than your right at the point of contact.",lower
+Left Shoulder,"Ensure your left shoulder works down and under for optimal power.",lower
+Left Shoulder,"A lower left shoulder at impact helps compress the ball.",lower
+Left Shoulder,"Your left shoulder should dip slightly to encourage proper weight transfer.",lower
+Right Shoulder,"Your right shoulder should be lower than your left at address, creating a proper tilt.",lower
+Right Shoulder,"Your right shoulder should be lower than your left at the top.",lower
+Right Shoulder,"Allow your right shoulder to drop on the downswing.",lower
+Right Shoulder,"Ensure your right shoulder comes through under the left shoulder.",lower
+Right Shoulder,"Your right shoulder should be lower than your left at impact.",lower
+Right Shoulder,"Keep your right arm tucked in.",lower
+Right Shoulder,"Your right arm should be low and close.",lower
+Right Shoulder,"Keep your right arm close to your body on the downswing.",lower
+Right Shoulder,"Your right arm should be tucked in at the elbow.",lower
+Right Shoulder,"Keep your right arm tucked in.",lower
+Right Shoulder,"Your right arm should be low and close at address.",lower
+Right Shoulder,"Keep your right arm tucked against your side.",lower
+Right Shoulder,"Keep your right shoulder lower than your left through the swing.",lower
+Right Shoulder,"Prevent your right shoulder from rising too much.",lower
+Right Shoulder,"Ensure your right shoulder stays down through impact.",lower
+Right Shoulder,"Your right shoulder should be lower than your left at the finish.",lower
+Right Shoulder,"Maintain a low right shoulder throughout the swing for better rotation.",lower
+Right Shoulder,"Your right shoulder should be lower at address for a steeper swing.",lower
+Right Shoulder,"Focus on keeping your right shoulder beneath your left during the downswing.",lower
+Right Shoulder,"Allow your right shoulder to move down and through for solid contact.",lower
+Right Shoulder,"To avoid coming over the top, keep your right shoulder lower.",lower
+Right Shoulder,"Your right shoulder should be lower than your left at the moment of truth.",lower
+Right Shoulder,"Feel your right shoulder pulling down towards the ball.",lower
+Right Shoulder,"Your right shoulder should be lower than your left to promote an inside swing path.",lower
+Right Shoulder,"Ensure your right shoulder remains low to prevent slicing.",lower
+Right Shoulder,"A lower right shoulder at impact can improve your ball striking.",lower
+Right Shoulder,"Your right shoulder should be lower than your left as you initiate the downswing.",lower
+Right Shoulder,"Your right shoulder should be higher than your left at the top of the backswing.",higher
+Right Shoulder,"Allow your right shoulder to rise slightly through impact.",higher
+Right Shoulder,"Ensure your right shoulder finishes higher than your left.",higher
+Right Shoulder,"Your right shoulder should be higher than your left during the follow-through.",higher
+Right Shoulder,"Keep your right shoulder higher than your left in the backswing.",higher
+Right Shoulder,"Your right shoulder should feel like it's lifting towards the sky at the top.",higher
+Right Shoulder,"Elevate your right shoulder slightly for a wider arc.",higher
+Right Shoulder,"Ensure your right shoulder completes its rotation by coming up.",higher
+Right Shoulder,"Your right shoulder should be higher than your left at the top of the swing for proper coil.",higher
+Right Shoulder,"To generate more power, let your right shoulder work up.",higher
+Right Shoulder,"Your right shoulder should be higher than your left at the end of your swing.",higher
+Right Shoulder,"Prevent your right shoulder from dropping too much on the downswing.",higher
+Right Shoulder,"Feel your right shoulder rising as you extend through the ball.",higher
+Right Shoulder,"A higher right shoulder at the finish indicates full rotation.",higher
+Right Shoulder,"Your right shoulder should be higher than your left as you follow through.",higher
+Right Shoulder,"Keep your right shoulder higher to maintain width in the backswing.",higher
+Right Shoulder,"Your right shoulder should rise as you drive through the ball.",higher
+Right Shoulder,"Ensure your right shoulder finishes high and behind your lead shoulder.",higher
+Right Shoulder,"A higher right shoulder promotes a balanced finish.",higher
 Left Arm,"Your left arm should be high at the top of the backswing.",higher
-Left Arm,"Your left arm should be parallel to the ground at the top.",neutral/adjust
-Left Arm,"Your left arm should be straight and taut.",neutral/adjust
-Left Arm,"Ensure your lead arm is not detached from your body.",neutral/adjust
-Left Arm,"Keep your left arm close to your chest.",neutral/adjust
-Left Arm,"Prevent your left arm from bending on the backswing.",neutral/adjust
-Left Arm,"Your left arm should be straight at the top.",neutral/adjust
-Left Arm,"Your left arm should be firm at impact.",neutral/adjust
-Left Arm,"Ensure your left arm is extended towards the target.",neutral/adjust
-Left Arm,"Your left arm should be straight, but not stiff.",neutral/adjust
-Left Arm,"Your left arm should stay connected to your torso.",neutral/adjust
-Left Arm,"Prevent your left arm from pulling across your body.",neutral/adjust
-Left Arm,"Your left arm should be a strong, straight lever.",neutral/adjust
-Left Arm,"Ensure your left arm is straight and strong.",neutral/adjust
-Left Arm,"Your left arm should be extended through the ball.",neutral/adjust
-Left Arm,"Prevent your left arm from collapsing.",neutral/adjust
-Left Arm,"Your left arm should be straight at the top of the swing.",neutral/adjust
-Left Arm,"Your left arm should be long and extended.",neutral/adjust
-Left Arm,"Prevent your left arm from breaking down.",neutral/adjust
-Left Arm,"Your left arm should be straight and firm.",neutral/adjust
-Left Arm,"Ensure your left arm is extended and wide.",neutral/adjust
-Left Arm,"Your left arm should be extended and straight.",neutral/adjust
-Left Arm,"Prevent your left arm from bending excessively.",neutral/adjust
-Left Arm,"Your left arm should be firm through impact.",neutral/adjust
-
+Left Arm,"Keep your left arm higher in the backswing for more width.",higher
+Left Arm,"Your left arm should be elevated at the top of your swing.",higher
+Left Arm,"Ensure your left arm feels like it's reaching upwards.",higher
+Left Arm,"For a higher finish, allow your left arm to extend higher.",higher
+Left Arm,"Your left arm should be higher than your right arm at the top of the backswing.",higher
+Left Arm,"Elevate your left arm in the takeaway for a more upright swing.",higher
+Left Arm,"Your left arm should finish high above your right shoulder.",higher
+Left Arm,"Keep your left arm higher to promote a full turn.",higher
+Left Arm,"Your left arm should be higher through the hitting zone for a steeper angle of attack.",higher
+Left Arm,"Ensure your left arm stays high during the backswing to prevent early extension.",higher
+Left Arm,"Your left arm should feel like it's pulling up towards the target.",higher
+Left Arm,"A higher left arm at the finish indicates a complete swing.",higher
+Left Arm,"Your left arm should be higher at impact for a downward strike.",higher
+Left Arm,"Your left arm should be lower at the top of the backswing.",lower
+Left Arm,"Allow your left arm to drop lower on the downswing.",lower
+Left Arm,"Your left arm should be lower than your right at impact.",lower
+Left Arm,"Keep your left arm lower through the hitting area.",lower
+Left Arm,"Your left arm should be tucked lower into your body at address.",lower
+Left Arm,"For a flatter swing plane, keep your left arm lower.",lower
+Left Arm,"Ensure your left arm works down and through the ball.",lower
+Left Arm,"Your left arm should feel closer to your body on the downswing.",lower
+Left Arm,"Allow your left arm to lower naturally during the transition.",lower
+Left Arm,"Your left arm should be lower at the finish for better control.",lower
+Left Arm,"Your left arm should be lower than your right at the top for a more compact swing.",lower
+Left Arm,"Keep your left arm working down on the downswing to avoid a steep swing.",lower
+Left Arm,"Feel your left arm staying low and connected through the swing.",lower
+Left Arm,"A lower left arm at impact helps with ball compression.",lower
+Left Arm,"Your left arm should drop closer to your body on the downswing.",lower
 Right Arm,"Your right arm should be lower at address, creating a proper tilt.",lower
-Right Arm,"Ensure your right arm is slightly bent at address.",neutral/adjust
-Right Arm,"Your trail arm should maintain a slight bend at the top.",neutral/adjust
-Right Arm,"Your trail arm should fold naturally after impact.",neutral/adjust
-Right Arm,"Your right arm should be straight after impact.",neutral/adjust
-Right Arm,"Keep your right arm relaxed at address.",neutral/adjust
-Right Arm,"Your right arm should remain slightly bent at the top.",neutral/adjust
-Right Arm,"Your right arm should be soft at address.",neutral/adjust
 Right Arm,"Keep your right arm tucked in.",lower
-Right Arm,"Your right arm should be relaxed and flexible.",neutral/adjust
-Right Arm,"Your right arm should extend fully after impact.",neutral/adjust
-Right Arm,"Your right arm should be soft at the top.",neutral/adjust
-Right Arm,"Keep your right arm slightly bent at the top.",neutral/adjust
 Right Arm,"Your right arm should be low and close.",lower
-Right Arm,"Your right arm should be leading the club.",neutral/adjust
-Right Arm,"Keep your right arm bent until impact.",neutral/adjust
-Right Arm,"Your right arm should be under your left arm at the top.",lower
-Right Arm,"Your right arm should be leading the club down.",neutral/adjust
 Right Arm,"Keep your right arm close to your body on the downswing.",lower
 Right Arm,"Your right arm should be tucked in at the elbow.",lower
-Right Arm,"Keep your right arm bent at the top.",neutral/adjust
-Right Arm,"Your right arm should be soft at address.",neutral/adjust
 Right Arm,"Keep your right arm tucked in.",lower
-Right Arm,"Your right arm should be relaxed throughout the swing.",neutral/adjust
 Right Arm,"Your right arm should be low and close at address.",lower
-Right Arm,"Your right arm extends after impact.",neutral/adjust
-Right Arm,"Your right arm should stay connected to your torso.",neutral/adjust
 Right Arm,"Keep your right arm tucked against your side.",lower
+Right Arm,"Your right arm should be lower than your left arm at the top of the backswing.",lower
+Right Arm,"Allow your right arm to fold lower on the backswing.",lower
+Right Arm,"Your right arm should remain low and connected through impact.",lower
+Right Arm,"For an inside path, keep your right arm working lower.",lower
+Right Arm,"Ensure your right arm stays beneath your left arm on the downswing.",lower
+Right Arm,"Your right arm should feel like it's pulling down into the slot.",lower
+Right Arm,"Prevent your right arm from flying out at the top.",lower
+Right Arm,"Your right arm should be lower at impact for a powerful release.",lower
+Right Arm,"Keep your right arm driving down and through the ball.",lower
+Right Arm,"A lower right arm through impact helps maintain clubhead speed.",lower
+Right Arm,"Your right arm should be lower than your left arm at the finish.",lower
+Right Arm,"Feel your right arm staying low and under the lead arm.",lower
+Right Arm,"Your right arm should be higher at the top of the backswing.",higher
+Right Arm,"Allow your right arm to extend higher after impact.",higher
+Right Arm,"Your right arm should finish high.",higher
+Right Arm,"Keep your right arm elevated in the follow-through.",higher
+Right Arm,"Your right arm should feel like it's reaching up and out.",higher
+Right Arm,"For a higher trajectory, allow your right arm to release higher.",higher
+Right Arm,"Ensure your right arm extends fully towards the target.",higher
+Right Arm,"Your right arm should be higher than your left arm at the finish.",higher
+Right Arm,"Swing your right arm higher for a more vertical swing plane.",higher
+Right Arm,"Keep your right arm higher in the backswing for a wider arc.",higher
+Right Arm,"Your right arm should be higher than your left at the top for proper coil.",higher
+Right Arm,"Feel your right arm lifting and expanding on the backswing.",higher
+Right Arm,"A higher right arm through impact indicates a strong release.",higher
+Right Arm,"Your right arm should work higher to achieve a full finish.",higher
