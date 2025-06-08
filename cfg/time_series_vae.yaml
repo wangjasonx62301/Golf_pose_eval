@@ -39,6 +39,7 @@ data:
   aligned_json_path: "../dataset/aligned_json"
   combined_video_path: "../dataset/combined_video"
   advice_csv_path: "../dataset/Pose_advice/pose_advice.csv"
+  keypoint_combined_json_path: "../dataset/keypoint_combined_json"
   max_seq_len: 64
   pad_token_id: 100258
   begin_token_id: 100259

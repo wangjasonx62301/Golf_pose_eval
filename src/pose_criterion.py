@@ -1,4 +1,6 @@
 # from data import *
+from json import load
+from re import S
 from requests import get
 import sys
 import os
@@ -112,3 +114,98 @@ def calculate_keypoint_distance_with_two_json_folder(config, target_json_folder_
     
 
 
+def combine_aligned_json_with_keypoint_distance(config, aligned_json_path, keypoint_distance_json_path):
+    """
+    Combine aligned JSON files with keypoint distance JSON files by inserting one shared 'advice' per frame into each person's data.
+    """
+
+    combined_data = {
+        "video_info": {
+            "width": 1440,
+            "height": 1080,
+            "fps": 30.0
+        },
+        "frames": []
+    }
+    
+    # this function only combine two json files, one is aligned json, the other is keypoint distance json
+    # load json files
+    with open(aligned_json_path, 'r') as f:
+        aligned_data = json.load(f)
+
+    with open(keypoint_distance_json_path, 'r') as f:
+        distance_data = json.load(f)
+
+    # print(aligned_data)
+    for frame_index, frame in enumerate(aligned_data['frames']):
+        # print(frame_index)
+        if frame_index >= len(distance_data):
+            print(f"Warning: Frame index {frame_index} exceeds distance data length. Skipping this frame.")
+            continue
+        advice_value = distance_data[frame_index] 
+
+        # print(frame)
+        for person in frame["persons"]:
+            person["advice"] = advice_value
+
+        combined_data["frames"].append(frame)
+
+    output_path = config['data']['keypoint_combined_json_path']
+    os.makedirs(output_path, exist_ok=True)
+    output_file = os.path.join(output_path, f"{os.path.basename(aligned_json_path).split('.')[0]}_combined.json")
+
+    with open(output_file, 'w') as f:
+        json.dump(combined_data, f, indent=2)
+
+    print(f"Combined JSON saved to: {output_file}")
+    
+# with open('../cfg/time_series_vae.yaml', 'r') as f:
+#     config = yaml.safe_load(f)    
+
+# combine_aligned_json_with_keypoint_distance(config=config, 
+#                                             aligned_json_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/aligned_json_1/keypoints_100-1_aligned.json',
+#                                             keypoint_distance_json_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/keypoint_distance_json/keypoints_100-1_aligned.json')
+    
+def combine_aligned_json_with_keypoint_distance_folder(config, aligned_json_folder_path, keypoint_distance_json_folder_path):
+    """
+    Combine aligned JSON files with keypoint distance JSON files in folders.
+    """
+    aligned_json_files = list(Path(aligned_json_folder_path).glob("*.json"))
+    keypoint_distance_json_files = list(Path(keypoint_distance_json_folder_path).glob("*.json"))
+    
+    # sort the files to ensure they match
+    aligned_json_files = sorted(aligned_json_files, key=lambda x: int(x.name.split('-')[0].split('_')[1]))  # Sort by video index
+    keypoint_distance_json_files = sorted(keypoint_distance_json_files, key=lambda x: int(x.name.split('_')[1].split('-')[0]))  # Sort by video index
+    
+    if len(aligned_json_files) != len(keypoint_distance_json_files):
+        raise ValueError("The number of JSON files in both folders must be the same.")
+    
+    for aligned_file, distance_file in zip(aligned_json_files, keypoint_distance_json_files):
+        combine_aligned_json_with_keypoint_distance(config=config,
+                                                    aligned_json_path=aligned_file,
+                                                    keypoint_distance_json_path=distance_file)
+    print(f"Combined JSON files saved to: {config['data']['keypoint_combined_json_path']}")
+  
+# test  
+# with open('../cfg/time_series_vae.yaml', 'r') as f:
+#     config = yaml.safe_load(f)    
+# combine_aligned_json_with_keypoint_distance_folder(config=config,
+#                                                     aligned_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/aligned_json_1',
+#                                                     keypoint_distance_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/keypoint_distance_json')
+
+# def add_advice_in_json(config, model, json_file_path):
+#     model.eval()
+#     frames = {}
+#     with open(json_file_path, 'r') as f:
+#         data = json.load(f)
+    
+#     keypoints_dict = {
+#         "5" : "Left Shoulder",
+#         "6" : "Right Shoulder",
+#         "7" : "Left Arm",
+#         "8" : "Right Arm"
+#     }
+    
+#     for frame in data:
+        
+        
