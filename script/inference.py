@@ -29,7 +29,8 @@ def main():
 
     model = KeypointTransformer(config).to('cuda')
     model.load_state_dict(torch.load(args.ckpt_path))
-
+    advice_decoder = AdviceTransformer(config).to('cuda')
+    advice_decoder.load_state_dict(torch.load('/home/jasonx62301/for_python/Golf/Golf_pose_eval/ckpt/AdviceDecoder_0.6863_iters_30000.pt'))
     # get_predicted_mp4_from_json_folder(
     #         model=model,
     #         config=config,
@@ -70,10 +71,15 @@ def main():
     #     output_path=f"{config['data']['combined_video_path']}_{args.mode}"
     # )
     
-    calculate_keypoint_distance_with_two_json_folder(target_json_folder_path=f"{config['data']['aligned_json_path']}_{args.mode}",
-                                                     source_json_folder_path=f"{config['data']['extracted_json_path']}_EVAL_{args.mode}",
-                                                     config=config)
-    
+    # calculate_keypoint_distance_with_two_json_folder(target_json_folder_path=f"{config['data']['aligned_json_path']}_{args.mode}",
+    #                                                  source_json_folder_path=f"{config['data']['extracted_json_path']}_EVAL_{args.mode}",
+    #                                                  config=config)
+    combine_aligned_json_with_keypoint_distance_folder(config=config,
+                                                        aligned_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/aligned_json_1',
+                                                        keypoint_distance_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/keypoint_distance_json',
+                                                        model=advice_decoder
+                                                        )
+
 if __name__ == '__main__': 
     main()
 #     with open('../cfg/time_series_vae.yaml', 'r') as f:

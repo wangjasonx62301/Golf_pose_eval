@@ -1,6 +1,7 @@
 # from data import *
 from json import load
 from re import S
+from turtle import distance
 from requests import get
 import sys
 import os
@@ -114,7 +115,7 @@ def calculate_keypoint_distance_with_two_json_folder(config, target_json_folder_
     
 
 
-def combine_aligned_json_with_keypoint_distance(config, aligned_json_path, keypoint_distance_json_path):
+def combine_aligned_json_with_keypoint_distance(config, aligned_json_path, keypoint_distance_json_path, model=None):
     """
     Combine aligned JSON files with keypoint distance JSON files by inserting one shared 'advice' per frame into each person's data.
     """
@@ -127,6 +128,19 @@ def combine_aligned_json_with_keypoint_distance(config, aligned_json_path, keypo
         },
         "frames": []
     }
+    
+    keypoint_keydict = {
+        "5": "Category: Left Shoulder;",
+        "6": "Category: Right Shoulder;",
+        "7": "Category: Left Arm;",
+        "8": "Category: Right Arm;"
+    }
+    advice_keydict = {
+        1: " CorrectionDirection: lower, Correction:",
+        2: " CorrectionDirection: higher, Correction:",
+        0: ""
+    }
+    
     
     # this function only combine two json files, one is aligned json, the other is keypoint distance json
     # load json files
@@ -142,7 +156,11 @@ def combine_aligned_json_with_keypoint_distance(config, aligned_json_path, keypo
         if frame_index >= len(distance_data):
             print(f"Warning: Frame index {frame_index} exceeds distance data length. Skipping this frame.")
             continue
-        advice_value = distance_data[frame_index] 
+        advice_value = {}
+        for key, value in distance_data[frame_index].items():
+            if not value:
+                continue
+            advice_value[key] = model.generate_advice(max_new_tokens=64, input_seq=keypoint_keydict[str(key)] + advice_keydict[value])
 
         # print(frame)
         for person in frame["persons"]:
@@ -166,7 +184,7 @@ def combine_aligned_json_with_keypoint_distance(config, aligned_json_path, keypo
 #                                             aligned_json_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/aligned_json_1/keypoints_100-1_aligned.json',
 #                                             keypoint_distance_json_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/keypoint_distance_json/keypoints_100-1_aligned.json')
     
-def combine_aligned_json_with_keypoint_distance_folder(config, aligned_json_folder_path, keypoint_distance_json_folder_path):
+def combine_aligned_json_with_keypoint_distance_folder(config, aligned_json_folder_path, keypoint_distance_json_folder_path, model=None):
     """
     Combine aligned JSON files with keypoint distance JSON files in folders.
     """
@@ -183,7 +201,8 @@ def combine_aligned_json_with_keypoint_distance_folder(config, aligned_json_fold
     for aligned_file, distance_file in zip(aligned_json_files, keypoint_distance_json_files):
         combine_aligned_json_with_keypoint_distance(config=config,
                                                     aligned_json_path=aligned_file,
-                                                    keypoint_distance_json_path=distance_file)
+                                                    keypoint_distance_json_path=distance_file,
+                                                    model=model)
     print(f"Combined JSON files saved to: {config['data']['keypoint_combined_json_path']}")
   
 # test  
