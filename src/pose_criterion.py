@@ -1,8 +1,4 @@
 # from data import *
-from json import load
-from re import S
-from turtle import distance
-from requests import get
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -10,7 +6,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.utils import *
 from src.data import *
-import tiktoken
 import pandas as pd
 
 # encoding = tiktoken.get_encoding("gpt2

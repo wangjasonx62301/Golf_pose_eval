@@ -1,10 +1,6 @@
-import json
-from turtle import left
-import numpy as np
 import os
 from src.data import *
 from src.utils import *
-import yaml
 
 def calculate_distance(point1 : tuple, point2 : tuple):
     return (abs(point1[0] - point2[0])**2 + abs(point1[1] - point2[1])**2)**0.5
