@@ -5,6 +5,8 @@ __pycache__/
 *.json
 *.zip
 *.pt
+*.jpg
+*.png
 
 !dataset/dataset_0.json
 !dataset/dataset_1.json
