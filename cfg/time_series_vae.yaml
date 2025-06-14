@@ -7,7 +7,7 @@ model:
   num_mlp_iter: 5
   n_embd: 128
   block_size: 256
-  num_layers: 8
+  num_layers: 6
   num_heads: 8
 
 advice_model:

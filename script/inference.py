@@ -16,9 +16,9 @@ def main():
     parser.add_argument("--yaml_file", type=str, default="../cfg/time_series_vae.yaml", help="Path to config yaml file")
     parser.add_argument("--skeleton_connection_file", type=str, default="../cfg/pose_connection.yaml", help="Path to skeleton connection config file")
     parser.add_argument("--mode", type=int, default=1, help="index 0,1,2")
-    parser.add_argument("--ckpt_path", type=str, default="/home/jasonx62301/for_python/Golf/Golf_pose_eval/ckpt/_CHose_KeypointTransformer_0.0041_epochs_200_current_200_NumLayers_8_NumEmb_128_NumHead_8_Mode_1.pt", help="Path to the model checkpoint file")
-    parser.add_argument("--json_folder", type=str, default="/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/skeleton_eval", help="Path to the folder containing JSON files")
-    parser.add_argument("--save_path", type=str, default="/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/skeleton_predict_json", help="Path to save the predicted JSON files")
+    parser.add_argument("--ckpt_path", type=str, default="/home/louis/github/Golf_pose_eval/ckpt/KeypointTransformer_final_epochs_150.pt", help="Path to the model checkpoint file")
+    parser.add_argument("--json_folder", type=str, default="/home/louis/github/Golf_pose_eval/dataset/skeleton_eval", help="Path to the folder containing JSON files")
+    parser.add_argument("--save_path", type=str, default="/home/louis/github/Golf_pose_eval//dataset/skeleton_predict_json", help="Path to save the predicted JSON files")
     args = parser.parse_args()
 
     with open(args.yaml_file, 'r') as f:
@@ -29,8 +29,8 @@ def main():
 
     model = KeypointTransformer(config).to('cuda')
     model.load_state_dict(torch.load(args.ckpt_path))
-    advice_decoder = AdviceTransformer(config).to('cuda')
-    advice_decoder.load_state_dict(torch.load('/home/jasonx62301/for_python/Golf/Golf_pose_eval/ckpt/AdviceDecoder_0.6863_iters_30000.pt'))
+    # advice_decoder = AdviceTransformer(config).to('cuda')
+    # advice_decoder.load_state_dict(torch.load('/home/louis/github/Golf_pose_eval/ckpt/AdviceDecoder_0.6863_iters_30000.pt'))
     # get_predicted_mp4_from_json_folder(
     #         model=model,
     #         config=config,
@@ -74,11 +74,11 @@ def main():
     # calculate_keypoint_distance_with_two_json_folder(target_json_folder_path=f"{config['data']['aligned_json_path']}_{args.mode}",
     #                                                  source_json_folder_path=f"{config['data']['extracted_json_path']}_EVAL_{args.mode}",
     #                                                  config=config)
-    combine_aligned_json_with_keypoint_distance_folder(config=config,
-                                                        aligned_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/aligned_json_1',
-                                                        keypoint_distance_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/keypoint_distance_json',
-                                                        model=advice_decoder
-                                                        )
+    # combine_aligned_json_with_keypoint_distance_folder(config=config,
+    #                                                     aligned_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/aligned_json_1',
+    #                                                     keypoint_distance_json_folder_path='/home/jasonx62301/for_python/Golf/Golf_pose_eval/dataset/keypoint_distance_json',
+    #                                                     model=advice_decoder
+    #                                                     )
 
 if __name__ == '__main__': 
     main()
