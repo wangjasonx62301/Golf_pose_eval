@@ -7,9 +7,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
 PROJECT_ROOT = "/home/louis/github/Golf_pose_eval" #path
-video_id = "061"
+video_id = "100"
 id_mode = [f"{video_id}-0", f"{video_id}-1", f"{video_id}-2"]
-
+offset = 50
+conf = 0.43
+slow_factor = 6
+cut_tail_frames = 38
 
 OUTPUT_DIR = f"{PROJECT_ROOT}/final/{video_id}"
 VIDEO_DIR = f"{PROJECT_ROOT}/dataset/video"
@@ -17,13 +20,13 @@ IMAGE_DIR = f"{OUTPUT_DIR}/video_to_image"
 LABEL_DIR = f"{OUTPUT_DIR}/label_image"
 WEIGHTS_PATH = f"{PROJECT_ROOT}/Golf_Ball_Trajector_Tracking/runs/train/golf5/weights/best.pt"
 DETECT_SCRIPT = f"{PROJECT_ROOT}/Golf_Ball_Trajector_Tracking/detect.py"
-SKELETON_JSON = f"{PROJECT_ROOT}/dataset/skeleton_data_1/keypoints_{id_mode[1]}.json"
-PREDICTED_JSON = f"{PROJECT_ROOT}/final/keypoints/keypoints_{id_mode[1]}_aligned.json"
+SKELETON_JSON = f"{PROJECT_ROOT}/dataset/skeleton_eval_1/keypoints_{id_mode[1]}.json"
+PREDICTED_JSON = f"{PROJECT_ROOT}/final/keypoints/keypoints_{id_mode[1]}_aligned_combined.json"
 POSE_YAML = f"{PROJECT_ROOT}/cfg/pose_connection.yaml"
 BALL_VIDEO = f"{OUTPUT_DIR}/{id_mode[2]}.mp4"
 SKELETON_VIDEO = f"{OUTPUT_DIR}/{id_mode[1]}.mp4"
 MERGED_VIDEO = f"{OUTPUT_DIR}/{id_mode[0]}.mp4"
-ADVICE_JSON = f"{PROJECT_ROOT}/final/keypoints/keypoints_{id_mode[1]}_aligned.json"
+ADVICE_JSON = f"{PROJECT_ROOT}/final/keypoints/keypoints_{id_mode[1]}_aligned_combined_shifted.json"
 
 from src.create import extract_frames_from_video
 from src.draw_line import draw_ball_trajectory_video
@@ -46,7 +49,7 @@ def run_yolo_detection():
         "--weights", WEIGHTS_PATH,
         "--source", os.path.join(IMAGE_DIR, id_mode[2]),
         "--save-txt", "--save-conf", "--exist-ok",
-        "--img", "640", "--conf", "0.25",
+        "--img", "640", "--conf", str(conf),
         "--name", id_mode[2],
         "--project", LABEL_DIR
     ]
@@ -57,7 +60,7 @@ def run_draw_trajectory():
     image_folder = os.path.join(LABEL_DIR, id_mode[2])
     label_folder = os.path.join(image_folder, "labels")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    draw_ball_trajectory_video(image_folder, label_folder, BALL_VIDEO, conf_threshold=0.43)
+    draw_ball_trajectory_video(image_folder, label_folder, BALL_VIDEO, conf_threshold=conf)
     print("draw_line")
 
 def run_draw_skeleton():
@@ -69,7 +72,8 @@ def run_draw_skeleton():
         PREDICTED_JSON,
         f"{VIDEO_DIR}/{id_mode[1]}.mp4",
         SKELETON_VIDEO,
-        skeleton_cfg["skeleton_connections"]
+        skeleton_cfg["skeleton_connections"],
+        frame_offset = offset
     )
     print("draw_skeleton")
 
@@ -80,7 +84,8 @@ def run_final_merge():
         ball_video=BALL_VIDEO,
         output_video=MERGED_VIDEO,
         json_file=ADVICE_JSON,
-        slow_factor=6
+        slow_factor=slow_factor,
+        cut_tail_frames = cut_tail_frames
     )
     print("Merging videos.")
 

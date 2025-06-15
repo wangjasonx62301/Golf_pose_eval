@@ -1,36 +1,51 @@
 import cv2, json, re, os
 
 
-def slow_video(video, slow_factor=2):
+def slow_video(video, slow_factor):
     cap = cv2.VideoCapture(video)
 
     fps = int(cap.get(cv2.CAP_PROP_FPS))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     new_fps = fps / slow_factor
 
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out = cv2.VideoWriter(f"slow_{video}", fourcc, new_fps, (frame_width, frame_height))
+    frames_to_keep = total_frames
 
-    while cap.isOpened():
+    video_dir = os.path.dirname(video)
+    video_name = os.path.basename(video)
+    slow_path = os.path.join(video_dir, f"slow_{video_name}")
+
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(slow_path, fourcc, new_fps, (frame_width, frame_height))
+
+    frame_idx = 0
+    while cap.isOpened() and frame_idx < frames_to_keep:
         ret, frame = cap.read()
         if not ret:
             break
-
         out.write(frame)
+        frame_idx += 1
 
     cap.release()
     out.release()
+    print(f"Slow video saved to: {slow_path}")
 
-def merge_videos_with_advice(skeleton_video, ball_video, output_video, json_file, font_color=(255, 255, 255), slow_factor=6):
 
+def merge_videos_with_advice(
+    skeleton_video, ball_video, output_video, json_file,
+    font_color=(255, 255, 255), slow_factor=0, cut_tail_frames=0
+):
     skeleton_cap = cv2.VideoCapture(skeleton_video)
     ball_cap = cv2.VideoCapture(ball_video)
 
     frame_width = int(skeleton_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(skeleton_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(skeleton_cap.get(cv2.CAP_PROP_FPS))
+    total_frames = int(skeleton_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    total_frames_to_keep = max(total_frames - cut_tail_frames, 0)
 
     out = cv2.VideoWriter(output_video, cv2.VideoWriter_fourcc(*"mp4v"), fps, (frame_width, frame_height))
 
@@ -42,33 +57,35 @@ def merge_videos_with_advice(skeleton_video, ball_video, output_video, json_file
     with open(json_file, "r") as f:
         advice_data = json.load(f)
 
-    for person in advice_data["frames"]:
-        for advice in person["persons"]:
-            frame_idx = person["frame"]
-            skeleton_cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-            ball_cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+    frame_advice_map = {
+        frame["frame"]: frame["persons"][0].get("advice", {})
+        for frame in advice_data["frames"]
+        if frame.get("persons")
+    }
 
-            skeleton_ret, skeleton_frame = skeleton_cap.read()
-            ball_ret, ball_frame = ball_cap.read()
-            if not (skeleton_ret and ball_ret):
-                continue
+    frame_folder = f"output_video/{os.path.splitext(os.path.basename(ball_video))[0]}"
+    os.makedirs(frame_folder, exist_ok=True)
 
-            frame = cv2.addWeighted(skeleton_frame, 1, ball_frame, 1, 0)
+    for frame_idx in range(total_frames_to_keep):
+        skeleton_ret, skeleton_frame = skeleton_cap.read()
+        ball_ret, ball_frame = ball_cap.read()
+        if not (skeleton_ret and ball_ret):
+            break
 
+        frame = cv2.addWeighted(skeleton_frame, 1, ball_frame, 1, 0)
+
+        if frame_idx in frame_advice_map:
             y_offset = 0
-            for _, v in advice.get("advice", {}).items():
+            for _, v in frame_advice_map[frame_idx].items():
                 match = re.search(r"Correction:\s*(.*?)(?=\s*<\|endoftext\|>)", v)
                 if match:
                     text = match.group(1).strip()
-                    position = (50, frame_height - 100 + y_offset)
+                    position = (50, frame_height - 150 + y_offset)
                     cv2.putText(frame, text, position, font, font_scale, font_color, font_thickness, line_type)
                     y_offset += 40
 
-            out.write(frame)
-
-            frame_folder = f"frame/with_text/{os.path.splitext(ball_video)[0]}"
-            os.makedirs(frame_folder, exist_ok=True)
-            cv2.imwrite(f"{frame_folder}/{frame_idx}.png", frame)
+        out.write(frame)
+        cv2.imwrite(f"{frame_folder}/{frame_idx}.png", frame)
 
     skeleton_cap.release()
     ball_cap.release()
@@ -78,6 +95,7 @@ def merge_videos_with_advice(skeleton_video, ball_video, output_video, json_file
 
     if slow_factor > 1:
         slow_video(output_video, slow_factor)
+
 
 
 def main(

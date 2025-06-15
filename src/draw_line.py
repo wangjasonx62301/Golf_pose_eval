@@ -2,7 +2,7 @@ import cv2
 import os
 import glob
 
-def draw_ball_trajectory_video(image_folder, label_folder, output_path, conf_threshold=0.46):
+def draw_ball_trajectory_video(image_folder, label_folder, output_path, conf_threshold):
     import cv2, os, glob
     trajectory = []
     images = sorted(glob.glob(os.path.join(image_folder, '*.jpg')))
