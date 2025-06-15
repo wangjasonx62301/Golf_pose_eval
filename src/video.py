@@ -144,7 +144,7 @@ def main(
 
                     # advices[person["frame"]].append(text)
                     # print(text)
-                    position = (50, frame_height - 100 + y)
+                    position = (50, frame_height - 150 + y)
                     cv2.putText(
                         frame,
                         text,
@@ -171,23 +171,22 @@ def main(
 
 
 if __name__ == "__main__":
-    main(
-        "overlay_result.mp4",
-        "504.mp4",
-        "result.mp4",
-        "/home/public_datasets/golf/keypoint_combined_json/keypoints_504-1_aligned_combined.json",
-    )
-    slow_video("result.mp4", 6)
-    
-    # cap = cv2.VideoCapture("504.mp4")
-    # frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    # frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    # fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-    # cnt = 0
-    # while cap.isOpened():
-    #     ret, frame = cap.read()
-    #     if not ret:
-    #         break
+    # main(
+    #     "overlay_result.mp4",
+    #     "504.mp4",
+    #     "result.mp4",
+    #     "/home/public_datasets/golf/keypoint_combined_json/keypoints_504-1_aligned_combined.json",
+    # )
+    # slow_video("result.mp4", 6)
+    cap = cv2.VideoCapture("/home/public_datasets/golf/final_video/106/106-0.mp4")
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-    #     cv2.imwrite(f"{cnt}.png", frame)
+    cnt = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        cv2.imwrite(f"/home/public_datasets/golf/final_video/106/{cnt}.png", frame)
+        cnt += 1
